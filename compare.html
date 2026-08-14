@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PD+ · Pitching Dominance+</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header><div class="header-content"><div><h1><b>Pitching Dominance+ (PD+)</b></h1>
+<p>Historical dashboard for 4178 qualified pitcher-seasons from 1974-2026. PD+ combines ERA, K-BB%, BAA, HR/9, IP, and WPA using standardized component scores with era and park adjustments. These components are weighted 35%/35%/10%/10%/5%/5% in the PD+ formula.</p></div><div class="header-meta"><div class="data-source">All data was pulled from Fangraphs and Baseball Reference.</div><div class="data-update">2026 stats updated for games played 8/10/26</div></div></div></header>
+<div class="wrap">
+<div id="site-nav" class="site-nav"></div>
+<script src="nav.js"></script>
+<div class="section">
+<div class="card hh-card" id="pd-head-to-head">
+  <h2>PD+ Head-to-Head Comparison</h2>
+  <p class="section-subtitle">Choose a qualified pitcher-season on each side to compare their Pitching Dominance+ values.</p>
+
+  <div class="hh-compare-grid">
+    <div class="hh-panel">
+      <div class="hh-panel-label">Pitcher 1</div>
+      <div class="hh-control">
+        <label for="hhPitcher1">Search pitcher</label>
+        <input id="hhPitcher1" type="text" placeholder="e.g. Pedro Martinez" autocomplete="off">
+        <div id="hhSuggestions1" class="hh-suggestions"></div>
+      </div>
+      <div class="hh-control">
+        <label for="hhSeason1">Season</label>
+        <select id="hhSeason1" disabled><option value="">Choose a pitcher above</option></select>
+      </div>
+      <div id="hhResult1" class="hh-result"><div class="hh-result-empty">Search for a pitcher, then choose a season.</div></div>
+    </div>
+
+    <div class="hh-panel">
+      <div class="hh-panel-label">Pitcher 2</div>
+      <div class="hh-control">
+        <label for="hhPitcher2">Search pitcher</label>
+        <input id="hhPitcher2" type="text" placeholder="e.g. Greg Maddux" autocomplete="off">
+        <div id="hhSuggestions2" class="hh-suggestions"></div>
+      </div>
+      <div class="hh-control">
+        <label for="hhSeason2">Season</label>
+        <select id="hhSeason2" disabled><option value="">Choose a pitcher above</option></select>
+      </div>
+      <div id="hhResult2" class="hh-result"><div class="hh-result-empty">Search for a pitcher, then choose a season.</div></div>
+    </div>
+  </div>
+
+  <div class="hh-breakdown" id="hhComparison">
+    <div class="hh-breakdown-title">Component Breakdown</div>
+    <div class="hh-table-wrap">
+      <table class="hh-table">
+        <thead>
+          <tr><th>Component</th><th id="hhHead1">Pitcher 1</th><th id="hhHead2">Pitcher 2</th><th>Higher</th></tr>
+        </thead>
+        <tbody id="hhComponentBody"></tbody>
+      </table>
+    </div>
+    <div class="hh-winner-line" id="hhWinnerLine"></div>
+    <div class="hh-how-works">
+      <strong>How it works</strong>
+      Choose a qualified pitcher-season on each side. The component rows compare the six standardized z-scores that make up PD+.
+    </div>
+  </div>
+</div>
+</div>
+<footer>Source workbook: Pitching Dominance+ (1974–2026). 2026 is provisional until the season is finalized.</footer>
+</div>
+<script src="data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

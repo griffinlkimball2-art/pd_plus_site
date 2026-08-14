@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PD+ · Pitching Dominance+</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header><div class="header-content"><div><h1><b>Pitching Dominance+ (PD+)</b></h1>
+<p>Historical dashboard for 4178 qualified pitcher-seasons from 1974-2026. PD+ combines ERA, K-BB%, BAA, HR/9, IP, and WPA using standardized component scores with era and park adjustments. These components are weighted 35%/35%/10%/10%/5%/5% in the PD+ formula.</p></div><div class="header-meta"><div class="data-source">All data was pulled from Fangraphs and Baseball Reference.</div><div class="data-update">2026 stats updated for games played 8/10/26</div></div></div></header>
+<div class="wrap">
+<div id="site-nav" class="site-nav"></div>
+<script src="nav.js"></script>
+<div class="section">
+<div class="card" id="pd-era-comparison">
+  <h2>PD+ by Decade</h2>
+  <p class="section-subtitle">Compare the distribution of PD+ across baseball decades and see how often pitchers produced elite PD+ seasons.</p>
+  <div class="pd-era-control">
+    <label for="pdEraSelect">Decade</label>
+    <select id="pdEraSelect">
+      <option value="1970">1970's</option>
+      <option value="1980">1980's</option>
+      <option value="1990">1990's</option>
+      <option value="2000">2000's</option>
+      <option value="2010">2010's</option>
+      <option value="2020">2020's</option>
+    </select>
+  </div>
+  <div class="pd-era-stats" id="pdEraStats"></div>
+  <div class="pd-era-top">
+    <div class="pd-era-section-title">Top PD+ Seasons</div>
+    <div id="pdEraTopSeasons"></div>
+  </div>
+  <p class="note">Decade statistics are calculated from the pitcher-season observations in the PD+ dataset. 2020's includes 2020–2026, with 2026 representing the ongoing season.</p>
+</div>
+</div>
+<div class="section">
+<div class="card">
+  <h2>PD+ Component Leaders</h2>
+  <p class="section-subtitle">#1 Z-Score Season in Each Component</p>
+  <p class="section-description">The single highest-ranked pitcher-season for each standardized component across the full 1974–2026 dataset.</p>
+  <div class="component-leaders-grid" id="componentLeadersGrid"></div>
+</div>
+</div>
+<footer>Source workbook: Pitching Dominance+ (1974–2026). 2026 is provisional until the season is finalized.</footer>
+</div>
+<script src="data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
