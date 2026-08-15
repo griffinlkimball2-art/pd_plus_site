@@ -346,6 +346,7 @@ const hhComponents=[
   ["IP Z-Score","ipz"],
   ["WPA Z-Score","wpaz"]
 ];
+const hhAvgKeys=["pd","eraz","kbbz","baaz","hr9z","ipz","wpaz"];
 
 function hhById(id){return document.getElementById(id);}
 function hhEsc(v){
@@ -355,6 +356,7 @@ function hhNorm(v){
   return String(v||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/[^a-z0-9]+/g," ").trim();
 }
 const hhPlayers=[...new Set(DATA.map(d=>d.player))].sort((a,b)=>a.localeCompare(b));
+let hhMode="";
 
 function hhCanonical(value){
   const n=hhNorm(value);
@@ -364,17 +366,108 @@ function hhCanonical(value){
 function hhRowsFor(player){
   return DATA.filter(d=>d.player===player).sort((a,b)=>a.season-b.season);
 }
+function hhPlayerYears(player){
+  return hhRowsFor(player).map(d=>Number(d.season));
+}
 function hhOther(side){return side===1?2:1;}
-function hhSelectedSeason(side){
-  const v=hhById("hhSeason"+side).value;
-  return v===""?null:Number(v);
+function hhAvgRow(rows){
+  const out={};
+  hhAvgKeys.forEach(k=>{
+    const vals=rows.map(r=>Number(r[k])).filter(v=>!Number.isNaN(v));
+    out[k]=vals.length?vals.reduce((a,b)=>a+b,0)/vals.length:null;
+  });
+  return out;
 }
-function hhGetRow(side){
+function hhFmt(v){return v==null||Number.isNaN(v)?"\u2014":Number(v).toFixed(2);}
+
+function hhGetValue(side){
   const player=hhCanonical(hhById("hhPitcher"+side).value);
-  const season=hhSelectedSeason(side);
-  if(!player||season===null)return null;
-  return DATA.find(d=>d.player===player&&Number(d.season)===season)||null;
+  if(!player)return null;
+  if(hhMode==="season"){
+    const selEl=hhById("hhSeason"+side);
+    if(!selEl||!selEl.value)return null;
+    const season=Number(selEl.value);
+    const row=DATA.find(d=>d.player===player&&Number(d.season)===season);
+    if(!row)return null;
+    return {
+      player,
+      yearLabel:String(row.season),
+      subtitle:`${row.season} season \u00b7 ${row.team}`,
+      pd:Number(row.pd),eraz:Number(row.eraz),kbbz:Number(row.kbbz),baaz:Number(row.baaz),hr9z:Number(row.hr9z),ipz:Number(row.ipz),wpaz:Number(row.wpaz)
+    };
+  }
+  if(hhMode==="span"){
+    const s=hhById("hhStart"+side), e=hhById("hhEnd"+side);
+    if(!s||!e||!s.value||!e.value)return null;
+    const start=Number(s.value), end=Number(e.value);
+    const rows=hhRowsFor(player).filter(d=>Number(d.season)>=start&&Number(d.season)<=end);
+    if(!rows.length)return null;
+    const avg=hhAvgRow(rows);
+    return {
+      player,
+      yearLabel:`${start}\u2013${end}`,
+      subtitle:`${start}\u2013${end} span \u00b7 ${rows.length} season${rows.length===1?"":"s"}`,
+      ...avg
+    };
+  }
+  if(hhMode==="career"){
+    const other=hhOther(side);
+    const otherPlayer=hhCanonical(hhById("hhPitcher"+other).value);
+    if(player===otherPlayer)return null;
+    const rows=hhRowsFor(player);
+    if(!rows.length)return null;
+    const avg=hhAvgRow(rows);
+    return {
+      player,
+      yearLabel:"",
+      subtitle:`Career \u00b7 ${rows.length} qualified season${rows.length===1?"":"s"}`,
+      ...avg
+    };
+  }
+  return null;
 }
+
+function hhEmptyMessage(side){
+  const typed=hhById("hhPitcher"+side).value.trim();
+  if(hhMode==="career"&&typed){
+    const player=hhCanonical(typed);
+    const other=hhOther(side);
+    const otherPlayer=hhCanonical(hhById("hhPitcher"+other).value);
+    if(player&&player===otherPlayer){
+      return "Already selected as the other pitcher \u2014 career mode compares two different pitchers.";
+    }
+  }
+  if(hhMode==="season")return "Search for a pitcher, then choose a season.";
+  if(hhMode==="span")return "Search for a pitcher, then choose a start and end year.";
+  if(hhMode==="career")return "Search for a pitcher to see career averages.";
+  return "";
+}
+function hhModeMeta(){
+  if(hhMode==="season")return "Qualified pitcher-season";
+  if(hhMode==="span")return "Average across qualified seasons in range";
+  if(hhMode==="career")return "Average across all qualified seasons";
+  return "";
+}
+function hhHowWorksText(){
+  if(hhMode==="season")return "Choose a qualified pitcher-season on each side. The component rows compare the six standardized z-scores that make up PD+.";
+  if(hhMode==="span")return "Choose a pitcher and a year range on each side. The component rows compare each pitcher's average z-scores across their qualified seasons within that range.";
+  if(hhMode==="career")return "Choose a pitcher on each side. The component rows compare each pitcher's average z-scores across their full set of qualified seasons.";
+  return "";
+}
+
+function hhRender(side,val){
+  const el=hhById("hhResult"+side);
+  if(!val){
+    el.innerHTML=`<div class="hh-result-empty">${hhEsc(hhEmptyMessage(side))}</div>`;
+    return;
+  }
+  el.innerHTML=`<div class="hh-result-player">${hhEsc(val.player)}</div>
+    <div class="hh-result-season">${hhEsc(val.subtitle)}</div>
+    <div class="hh-result-pd">${hhFmt(val.pd)}</div>
+    <div class="hh-result-label">Pitching Dominance+</div>
+    <div class="hh-result-meta">${hhModeMeta()}</div>`;
+}
+
 function hhShowSuggestions(side){
   const input=hhById("hhPitcher"+side), box=hhById("hhSuggestions"+side);
   const q=hhNorm(input.value);
@@ -383,12 +476,15 @@ function hhShowSuggestions(side){
     box.style.display="none";
     return;
   }
+  let pool=hhPlayers;
+  if(hhMode==="career"){
+    const other=hhOther(side);
+    const otherPlayer=hhCanonical(hhById("hhPitcher"+other).value);
+    if(otherPlayer)pool=hhPlayers.filter(p=>p!==otherPlayer);
+  }
 
-  // Match every word typed, ignoring accents and punctuation. Prefer names
-  // whose normalized name starts with the search text, then fall back to
-  // names containing all of the typed words.
   const parts=q.split(/\s+/).filter(Boolean);
-  const matches=hhPlayers.filter(p=>{
+  const matches=pool.filter(p=>{
     const n=hhNorm(p);
     return parts.every(part=>n.includes(part));
   }).sort((a,b)=>{
@@ -411,22 +507,20 @@ function hhShowSuggestions(side){
 
   box.querySelectorAll(".hh-suggestion").forEach(el=>{
     el.addEventListener("mousedown",e=>{
-      // mousedown fires before the input's blur event, so select the name
-      // without losing the suggestion list first.
       e.preventDefault();
       input.value=el.dataset.name;
       box.style.display="none";
-      hhPopulate(side,false);
-      hhRefreshOther(side);
+      hhOnPitcherSelected(side);
     });
   });
 }
 function hhHideSuggestions(side){
   setTimeout(()=>{hhById("hhSuggestions"+side).style.display="none";},120);
 }
-function hhPopulate(side,preserve=true){
+
+function hhPopulateSeason(side,preserve){
   const input=hhById("hhPitcher"+side), select=hhById("hhSeason"+side);
-  const old=hhSelectedSeason(side), player=hhCanonical(input.value);
+  const old=select.value, player=hhCanonical(input.value);
   if(!player){
     select.disabled=true;
     select.innerHTML='<option value="">Choose a pitcher above</option>';
@@ -435,56 +529,238 @@ function hhPopulate(side,preserve=true){
   input.value=player;
   const other=hhOther(side);
   const otherPlayer=hhCanonical(hhById("hhPitcher"+other).value);
-  const blocked=otherPlayer===player?hhSelectedSeason(other):null;
+  const otherSeasonEl=hhById("hhSeason"+other);
+  const blocked=(otherPlayer===player&&otherSeasonEl&&otherSeasonEl.value)?Number(otherSeasonEl.value):null;
   const rows=hhRowsFor(player);
   select.disabled=false;
   select.innerHTML='<option value="">Choose a season</option>'+rows.map(d=>{
     const off=blocked!==null&&Number(d.season)===blocked;
-    return `<option value="${d.season}"${off?" disabled":""}>${d.season}${off?" — already selected":""}</option>`;
+    return `<option value="${d.season}"${off?" disabled":""}>${d.season}${off?" \u2014 already selected":""}</option>`;
   }).join("");
-  if(preserve&&old!==null){
-    const opt=[...select.options].find(o=>Number(o.value)===old);
-    if(opt&&!opt.disabled)select.value=String(old);
+  if(preserve&&old){
+    const opt=[...select.options].find(o=>o.value===old);
+    if(opt&&!opt.disabled)select.value=old;
   }
-  hhRender(side,hhGetRow(side));hhUpdate();
+  hhRender(side,hhGetValue(side));hhUpdate();
 }
-function hhRender(side,row){
-  const el=hhById("hhResult"+side);
-  if(!row){
-    el.innerHTML='<div class="hh-result-empty">Choose a season to display the PD+ value.</div>';
+
+function hhValidStart(y,end,win){
+  if(y>=end)return false;
+  if(!win)return true;
+  if(end>win.end)return y>win.end;
+  if(end<win.start)return true;
+  return false;
+}
+function hhValidEnd(y,start,win){
+  if(y<=start)return false;
+  if(!win)return true;
+  if(start<win.start)return y<win.start;
+  if(start>win.end)return true;
+  return false;
+}
+function hhOtherWindow(side){
+  if(hhMode!=="span")return null;
+  const other=hhOther(side);
+  const player=hhCanonical(hhById("hhPitcher"+side).value);
+  const otherPlayer=hhCanonical(hhById("hhPitcher"+other).value);
+  if(!player||player!==otherPlayer)return null;
+  const s=hhById("hhStart"+other), e=hhById("hhEnd"+other);
+  if(!s||!e||!s.value||!e.value)return null;
+  return {start:Number(s.value),end:Number(e.value)};
+}
+function hhBuildSpanControls(side){
+  const startSel=hhById("hhStart"+side), endSel=hhById("hhEnd"+side);
+  if(!startSel||!endSel)return;
+  const player=hhCanonical(hhById("hhPitcher"+side).value);
+  const oldStart=startSel.value, oldEnd=endSel.value;
+
+  if(!player){
+    startSel.disabled=true;endSel.disabled=true;
+    startSel.innerHTML='<option value="">Choose a pitcher above</option>';
+    endSel.innerHTML='<option value="">Choose a pitcher above</option>';
     return;
   }
-  el.innerHTML=`<div class="hh-result-player">${hhEsc(row.player)}</div>
-    <div class="hh-result-season">${row.season} season · ${hhEsc(row.team)}</div>
-    <div class="hh-result-pd">${Number(row.pd).toFixed(2)}</div>
-    <div class="hh-result-label">Pitching Dominance+</div>
-    <div class="hh-result-meta">Qualified pitcher-season</div>`;
+  startSel.disabled=false;endSel.disabled=false;
+
+  const years=hhPlayerYears(player);
+  const win=hhOtherWindow(side);
+  const insideWin=y=>win&&y>=win.start&&y<=win.end;
+
+  const endVal=oldEnd?Number(oldEnd):null;
+  const startOptions=years.filter(y=>{
+    if(insideWin(y))return false;
+    if(endVal!==null)return hhValidStart(y,endVal,win);
+    return true;
+  });
+  startSel.innerHTML='<option value="">Start year</option>'+startOptions.map(y=>`<option value="${y}">${y}</option>`).join("");
+  startSel.value=startOptions.map(String).includes(oldStart)?oldStart:"";
+
+  const startVal=startSel.value?Number(startSel.value):null;
+  const endOptions=years.filter(y=>{
+    if(insideWin(y))return false;
+    if(startVal!==null)return hhValidEnd(y,startVal,win);
+    return true;
+  });
+  endSel.innerHTML='<option value="">End year</option>'+endOptions.map(y=>`<option value="${y}">${y}</option>`).join("");
+  endSel.value=endOptions.map(String).includes(oldEnd)?oldEnd:"";
+}
+
+function hhPopulateCareer(side){
+  const input=hhById("hhPitcher"+side);
+  const player=hhCanonical(input.value);
+  if(player)input.value=player;
+  hhRender(side,hhGetValue(side));
+  hhUpdate();
+}
+
+function hhOnPitcherSelected(side){
+  if(hhMode==="season")hhPopulateSeason(side,false);
+  else if(hhMode==="span"){
+    hhBuildSpanControls(side);
+    hhRender(side,hhGetValue(side));
+    hhUpdate();
+  } else if(hhMode==="career"){
+    hhPopulateCareer(side);
+  }
+  hhRefreshOther(side);
+}
+function hhOnTypedInput(side){
+  const val=hhById("hhPitcher"+side).value;
+  const player=hhCanonical(val);
+  if(player||!val.trim())hhOnPitcherSelected(side);
 }
 function hhRefreshOther(side){
   const other=hhOther(side);
-  const p=hhCanonical(hhById("hhPitcher"+side).value);
-  const op=hhCanonical(hhById("hhPitcher"+other).value);
-  if(p&&p===op)hhPopulate(other,true);
+  if(hhMode==="season"){
+    hhPopulateSeason(other,true);
+  } else if(hhMode==="span"){
+    hhBuildSpanControls(other);
+    hhRender(other,hhGetValue(other));
+    hhUpdate();
+  } else if(hhMode==="career"){
+    hhRender(other,hhGetValue(other));
+    hhUpdate();
+  }
 }
+
+function hhWireSide(side){
+  const input=hhById("hhPitcher"+side);
+  input.addEventListener("input",()=>{
+    hhShowSuggestions(side);
+    hhOnTypedInput(side);
+  });
+  input.addEventListener("focus",()=>hhShowSuggestions(side));
+  input.addEventListener("blur",()=>hhHideSuggestions(side));
+
+  if(hhMode==="season"){
+    hhById("hhSeason"+side).addEventListener("change",()=>{
+      hhRender(side,hhGetValue(side));
+      hhUpdate();
+      hhRefreshOther(side);
+    });
+  } else if(hhMode==="span"){
+    ["hhStart"+side,"hhEnd"+side].forEach(id=>{
+      hhById(id).addEventListener("change",()=>{
+        hhBuildSpanControls(side);
+        hhRender(side,hhGetValue(side));
+        hhUpdate();
+        hhRefreshOther(side);
+      });
+    });
+  }
+}
+
+function hhControlsHTML(side){
+  if(hhMode==="season"){
+    return `<div class="hh-control"><label for="hhSeason${side}">Season</label><select id="hhSeason${side}" disabled><option value="">Choose a pitcher above</option></select></div>`;
+  }
+  if(hhMode==="span"){
+    return `<div class="hh-control"><label for="hhStart${side}">Start year</label><select id="hhStart${side}" disabled><option value="">Choose a pitcher above</option></select></div>
+    <div class="hh-control"><label for="hhEnd${side}">End year</label><select id="hhEnd${side}" disabled><option value="">Choose a pitcher above</option></select></div>`;
+  }
+  return "";
+}
+function hhBodyHTML(){
+  return `
+  <div class="hh-compare-grid">
+    <div class="hh-panel">
+      <div class="hh-panel-label">Pitcher 1</div>
+      <div class="hh-control">
+        <label for="hhPitcher1">Search pitcher</label>
+        <input id="hhPitcher1" type="text" placeholder="e.g. Pedro Martinez" autocomplete="off">
+        <div id="hhSuggestions1" class="hh-suggestions"></div>
+      </div>
+      <div id="hhControls1"></div>
+      <div id="hhResult1" class="hh-result"></div>
+    </div>
+    <div class="hh-panel">
+      <div class="hh-panel-label">Pitcher 2</div>
+      <div class="hh-control">
+        <label for="hhPitcher2">Search pitcher</label>
+        <input id="hhPitcher2" type="text" placeholder="e.g. Greg Maddux" autocomplete="off">
+        <div id="hhSuggestions2" class="hh-suggestions"></div>
+      </div>
+      <div id="hhControls2"></div>
+      <div id="hhResult2" class="hh-result"></div>
+    </div>
+  </div>
+
+  <div class="hh-breakdown" id="hhComparison">
+    <div class="hh-breakdown-title">Component Breakdown</div>
+    <div class="hh-table-wrap">
+      <table class="hh-table">
+        <thead>
+          <tr><th>Component</th><th id="hhHead1">Pitcher 1</th><th id="hhHead2">Pitcher 2</th><th>Higher</th></tr>
+        </thead>
+        <tbody id="hhComponentBody"></tbody>
+      </table>
+    </div>
+    <div class="hh-winner-line" id="hhWinnerLine"></div>
+    <div class="hh-how-works">
+      <strong>How it works</strong>
+      <span id="hhHowWorksText"></span>
+    </div>
+  </div>`;
+}
+
+function hhSetMode(mode){
+  hhMode=mode;
+  const body=hhById("hhBody");
+  if(!mode){
+    body.innerHTML='<div class="hh-mode-empty">Choose a compare mode above to begin.</div>';
+    return;
+  }
+  body.innerHTML=hhBodyHTML();
+  hhById("hhHowWorksText").textContent=hhHowWorksText();
+  [1,2].forEach(side=>{
+    hhById("hhControls"+side).innerHTML=hhControlsHTML(side);
+    hhRender(side,null);
+    hhWireSide(side);
+  });
+  hhUpdate();
+}
+
 function hhUpdate(){
-  const a=hhGetRow(1),b=hhGetRow(2),el=hhById("hhComparison");
-  // Keep the Component Breakdown permanently open. It only fills in once
-  // both pitcher-seasons have been selected.
-  el.style.display="";
+  const el=hhById("hhComparison");
+  if(!el)return;
+  const a=hhGetValue(1),b=hhGetValue(2);
   if(!a||!b){
     hhById("hhHead1").textContent="Pitcher 1";
     hhById("hhHead2").textContent="Pitcher 2";
     hhById("hhComponentBody").innerHTML=hhComponents.map(([label])=>
-      `<tr><td class="hh-component">${label}</td><td class="hh-breakdown-empty">—</td><td class="hh-breakdown-empty">—</td><td class="hh-breakdown-empty">—</td></tr>`
+      `<tr><td class="hh-component">${label}</td><td class="hh-breakdown-empty">\u2014</td><td class="hh-breakdown-empty">\u2014</td><td class="hh-breakdown-empty">\u2014</td></tr>`
     ).join("");
-    hhById("hhWinnerLine").innerHTML=`<strong>Higher PD+:</strong> — · Difference: —`;
+    hhById("hhWinnerLine").innerHTML=`<strong>Higher PD+:</strong> \u2014 \u00b7 Difference: \u2014`;
     return;
   }
-  hhById("hhHead1").textContent=`${a.player} ${a.season}`;
-  hhById("hhHead2").textContent=`${b.player} ${b.season}`;
+  hhById("hhHead1").textContent=a.player+(a.yearLabel?` ${a.yearLabel}`:"");
+  hhById("hhHead2").textContent=b.player+(b.yearLabel?` ${b.yearLabel}`:"");
   hhById("hhComponentBody").innerHTML=hhComponents.map(([label,key])=>{
-    const av=Number(a[key]),bv=Number(b[key]);
-    const higher=Math.abs(av-bv)<1e-12?"Tie":(av>bv?a.player:b.player);
+    const av=a[key],bv=b[key];
+    if(av==null||bv==null){
+      return `<tr><td class="hh-component">${label}</td><td class="hh-breakdown-empty">\u2014</td><td class="hh-breakdown-empty">\u2014</td><td class="hh-breakdown-empty">\u2014</td></tr>`;
+    }
+    const higher=Math.abs(av-bv)<1e-9?"Tie":(av>bv?a.player:b.player);
     return `<tr>
       <td class="hh-component">${label}</td>
       <td class="${av>=bv?"hh-higher":""}">${av.toFixed(2)}</td>
@@ -492,12 +768,13 @@ function hhUpdate(){
       <td class="hh-higher">${hhEsc(higher)}</td>
     </tr>`;
   }).join("");
-  const diff=Math.abs(Number(a.pd)-Number(b.pd));
-  const winner=Math.abs(Number(a.pd)-Number(b.pd))<1e-9?"Tie":(Number(a.pd)>Number(b.pd)?a.player:b.player);
-  const winnerSeason=winner==="Tie"?"":(winner===a.player?` (${a.season})`:` (${b.season})`);
-  hhById("hhWinnerLine").innerHTML=`<strong>Higher PD+:</strong> ${hhEsc(winner)}${winnerSeason} · Difference: <strong>${diff.toFixed(2)}</strong>`;
-  syncBottomAlignment();
+  const diff=Math.abs(a.pd-b.pd);
+  const tie=diff<1e-9;
+  const winnerVal=tie?null:(a.pd>b.pd?a:b);
+  const winnerText=tie?"Tie":hhEsc(winnerVal.player)+(winnerVal.yearLabel?` (${hhEsc(winnerVal.yearLabel)})`:"");
+  hhById("hhWinnerLine").innerHTML=`<strong>Higher PD+:</strong> ${winnerText} \u00b7 Difference: <strong>${diff.toFixed(2)}</strong>`;
 }
+
 
 /* Historical Cy Young Prediction (year/league picker) */
 const CY_YEARS=Array.from({length:52},(_,i)=>2025-i);
@@ -716,27 +993,10 @@ function initPeakFinder(){
 }
 
 function initHeadToHead(){
-  if(!hhById("hhPitcher1")) return;
-  [1,2].forEach(side=>{
-    const input=hhById(`hhPitcher${side}`);
-    const select=hhById(`hhSeason${side}`);
-    input.addEventListener("input",()=>{
-      hhShowSuggestions(side);
-      const player=hhCanonical(input.value);
-      if(player===hhCanonical(input.value) && input.value.trim() && player){
-        hhPopulate(side,false);
-      } else if(!input.value.trim()){
-        hhPopulate(side,false);
-      }
-    });
-    input.addEventListener("focus",()=>hhShowSuggestions(side));
-    input.addEventListener("blur",()=>hhHideSuggestions(side));
-    select.addEventListener("change",()=>{
-      hhRender(side,hhGetRow(side));
-      hhUpdate();
-    });
-  });
-  hhUpdate();
+  const modeSel=hhById("hhMode");
+  if(!modeSel) return;
+  modeSel.addEventListener("change",()=>hhSetMode(modeSel.value));
+  hhSetMode("");
 }
 
 function initCyYoungLeaders(){
