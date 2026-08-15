@@ -943,7 +943,7 @@ function initEraComparison(){
 /* PD+ Component Leaders -- #1 all-time z-score in each component.
    Computed live from DATA (previously a hardcoded snapshot). */
 function computeComponentLeaders(){
-  const components=[["ERA Z-Score","eraz"],["K-BB% Z-Score","kbbz"],["BAA Z-Score","baaz"],["HR/9 Z-Score","hr9z"],["IP Z-Score","ipz"],["WPA Z-Score \u00b7 Clutch","wpaz"]];
+  const components=[["ERA Z-Score","eraz"],["K-BB% Z-Score","kbbz"],["BAA Z-Score","baaz"],["HR/9 Z-Score","hr9z"],["IP Z-Score","ipz"],["WPA Z-Score","wpaz"]];
   return components.map(([label,key])=>{
     const top=DATA.reduce((a,b)=>(b[key]??-Infinity)>(a[key]??-Infinity)?b:a);
     return {label,player:top.player,season:top.season,score:top[key]};
@@ -958,6 +958,7 @@ function initComponentLeaders(){
   <div class="component-leader-player">${l.player}</div>
   <div class="component-leader-season">${l.season} season</div>
   <div class="component-leader-score">${fmt(l.score,2)}</div>
+  <div class="component-leader-rank">#1 overall in the ${DATA.length.toLocaleString()} qualified pitcher-seasons</div>
 </div>`).join("");
 }
 
