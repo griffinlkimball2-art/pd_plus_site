@@ -6,7 +6,7 @@
     ["compare.html", "Compare"],
     ["peak-finder.html", "Peak Finder"],
     ["cy-young.html", "Cy Young"],
-    ["eras.html", "Eras & Leaders"],
+    ["eras.html", "Eras"],
     ["about.html", "About"],
   ];
 

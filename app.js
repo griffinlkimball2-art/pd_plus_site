@@ -958,7 +958,6 @@ function initComponentLeaders(){
   <div class="component-leader-player">${l.player}</div>
   <div class="component-leader-season">${l.season} season</div>
   <div class="component-leader-score">${fmt(l.score,2)}</div>
-  <div class="component-leader-rank">#1 overall in the ${DATA.length.toLocaleString()} qualified pitcher-seasons</div>
 </div>`).join("");
 }
 
