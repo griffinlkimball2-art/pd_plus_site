@@ -778,7 +778,7 @@ function hhUpdate(){
 
 /* Historical Cy Young Prediction (year/league picker) */
 const CY_YEARS=Array.from({length:52},(_,i)=>2025-i);
-const CY_YEAR_OVERRIDES={"1984|NL":{player:"Rick Sutcliffe",team:"CLE/CHC",pd:105.8640976,league:"NL",isReliever:false},"1996|AL":{player:"Pat Hentgen",team:"TOR",pd:113.1276445,league:"AL",isReliever:false}};
+const CY_YEAR_OVERRIDES={"1984|NL":{player:"Rick Sutcliffe",team:"CLE/CHC",pd:105.8637159,league:"NL",isReliever:false}};
 let cyDecadeSelect=null,cyYearSelect=null,cyLeagueSelect=null,cyResult=null,cyVerdict=null,cyReset=null;
 
 function cyBlankResult(){
@@ -949,17 +949,34 @@ function computeComponentLeaders(){
     return {label,player:top.player,season:top.season,score:top[key]};
   });
 }
+function computeOverallLeader(){
+  const top=DATA.reduce((a,b)=>Number(b.compz)>Number(a.compz)?b:a);
+  return {label:"Composite Z-Score",player:top.player,season:top.season,score:top.compz};
+}
 function initComponentLeaders(){
   const el=document.getElementById("componentLeadersGrid");
   if(!el) return;
   const leaders=computeComponentLeaders();
-  el.innerHTML=leaders.map(l=>`<div class="component-leader-card">
+  const overall=computeOverallLeader();
+  const cardHTML=l=>`<div class="component-leader-card">
   <div class="component-leader-label">${l.label}</div>
   <div class="component-leader-player">${l.player}</div>
   <div class="component-leader-season">${l.season} season</div>
   <div class="component-leader-score">${fmt(l.score,2)}</div>
   <div class="component-leader-rank">#1 overall in the ${DATA.length.toLocaleString()} qualified pitcher-seasons</div>
-</div>`).join("");
+</div>`;
+  const overallHTML=`<div class="component-leader-card component-leader-overall">
+  <div>
+    <div class="component-leader-label">${overall.label}</div>
+    <div class="component-leader-player">${overall.player}</div>
+    <div class="component-leader-season">${overall.season} season</div>
+  </div>
+  <div class="component-leader-overall-score">
+    <div class="component-leader-score">${fmt(overall.score,2)}</div>
+    <div class="component-leader-rank">#1 overall in the ${DATA.length.toLocaleString()} qualified pitcher-seasons</div>
+  </div>
+</div>`;
+  el.innerHTML=leaders.map(cardHTML).join("")+overallHTML;
 }
 
 /* ===== Page init functions ===== */
