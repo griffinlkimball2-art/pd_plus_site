@@ -1203,6 +1203,59 @@ function initCurrentSeasonPredictions(){
   renderCurrentSeasonPredictions();
 }
 
+/* This Season -- PD+ vs. Innings Pitched scatter and PD+ distribution histogram,
+   both scoped to CURRENT_SEASON so they roll over automatically each year. */
+function renderSeasonWorkloadScatter(){
+  const el=byId("seasonWorkloadScatter");
+  if(!el) return;
+  const headingEl=byId("seasonWorkloadHeading");
+  if(headingEl) headingEl.textContent=`${CURRENT_SEASON} PD+ vs. Innings Pitched`;
+  const pool=DATA.filter(d=>d.season===CURRENT_SEASON);
+  const trace={
+    x:pool.map(d=>d.ip),
+    y:pool.map(d=>d.pd),
+    mode:"markers",
+    type:"scatter",
+    marker:{size:8,opacity:0.78,color:"#2f6fed"},
+    customdata:pool.map(d=>[d.player,d.team,d.lg]),
+    hovertemplate:"<b>%{customdata[0]}</b><br>%{customdata[1]} \u00b7 %{customdata[2]}<br>IP: %{x:.1f}<br>PD+: %{y:.2f}<extra></extra>"
+  };
+  const layout={
+    margin:{l:55,r:20,t:20,b:45},
+    paper_bgcolor:"#fff",plot_bgcolor:"#fff",hovermode:"closest",
+    xaxis:{title:"Innings Pitched",gridcolor:"#eee",zeroline:false},
+    yaxis:{title:"PD+",gridcolor:"#eee",zeroline:false},
+    font:{family:"system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif",color:"#171717"}
+  };
+  Plotly.react(el,[trace],layout,{responsive:true,displaylogo:false});
+}
+function renderSeasonDistHistogram(){
+  const el=byId("seasonDistHistogram");
+  if(!el) return;
+  const headingEl=byId("seasonDistHeading");
+  if(headingEl) headingEl.textContent=`${CURRENT_SEASON} PD+ Distribution`;
+  const pool=DATA.filter(d=>d.season===CURRENT_SEASON);
+  const trace={
+    x:pool.map(d=>d.pd),
+    type:"histogram",
+    xbins:{size:5},
+    marker:{color:"#2f6fed"}
+  };
+  const layout={
+    margin:{l:55,r:20,t:20,b:45},
+    paper_bgcolor:"#fff",plot_bgcolor:"#fff",bargap:0.05,
+    xaxis:{title:"PD+",gridcolor:"#eee",zeroline:false},
+    yaxis:{title:"Pitchers",gridcolor:"#eee",zeroline:false},
+    font:{family:"system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif",color:"#171717"}
+  };
+  Plotly.react(el,[trace],layout,{responsive:true,displaylogo:false});
+}
+function initSeasonCharts(){
+  if(!byId("seasonWorkloadScatter")) return;
+  renderSeasonWorkloadScatter();
+  renderSeasonDistHistogram();
+}
+
 /* Run every page init. Each one is a no-op if its markup isn't on the page. */
 initHome();
 initPeakFinder();
@@ -1211,6 +1264,7 @@ initCyYoungPredictor();
 initCyYoungLeaders();
 initNetCyYoungBoards();
 initCurrentSeasonPredictions();
+initSeasonCharts();
 initEraComparison();
 initEraTrend();
 initComponentLeaders();

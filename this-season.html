@@ -22,8 +22,23 @@
   </div>
 </div>
 </div>
+<div class="section grid two">
+<div class="card">
+  <h2 id="seasonWorkloadHeading">PD+ vs. Innings Pitched</h2>
+  <p class="section-subtitle" id="seasonWorkloadSubtitle">Workload vs. dominance for every qualified pitcher this season.</p>
+  <div id="seasonWorkloadScatter" class="scatter-box"></div>
+  <p class="note">Each point is a qualified pitcher this season. Hover for details.</p>
+</div>
+<div class="card">
+  <h2 id="seasonDistHeading">PD+ Distribution</h2>
+  <p class="section-subtitle" id="seasonDistSubtitle">How PD+ is spread across every qualified pitcher this season.</p>
+  <div id="seasonDistHistogram" class="scatter-box"></div>
+  <p class="note">Each bar is a 5-point PD+ range.</p>
+</div>
+</div>
 <footer>Source workbook: Pitching Dominance+ (1974–2026). 2026 is provisional until the season is finalized.</footer>
 </div>
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
 <script src="data.js"></script>
 <script src="app.js"></script>
 </body>
