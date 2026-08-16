@@ -908,6 +908,20 @@ function computeDecadeCyAccuracy(startYear,endYear){
 function renderPDEra(){
   const el=document.getElementById("pdEraSelect");
   if(!el) return;
+  const topSection=document.querySelector("#pd-era-comparison .pd-era-top");
+  const bottomSection=document.querySelector("#pd-era-comparison .pd-era-bottom");
+
+  if(!el.value){
+    document.getElementById("pdEraStats").innerHTML='<div class="pd-era-empty">Choose a decade to see its PD+ distribution.</div>';
+    document.getElementById("pdEraTopSeasons").innerHTML="";
+    document.getElementById("pdEraBottomSeasons").innerHTML="";
+    if(topSection)topSection.style.display="none";
+    if(bottomSection)bottomSection.style.display="none";
+    return;
+  }
+  if(topSection)topSection.style.display="";
+  if(bottomSection)bottomSection.style.display="";
+
   const start=Number(el.value);
   const startYear=Math.max(1974,start);
   const endYear=start+9;
@@ -977,6 +991,39 @@ function initEraComparison(){
   if(!el) return;
   el.addEventListener("change",renderPDEra);
   renderPDEra();
+}
+
+/* PD+ Trend by Year -- max/average/min PD+ across all qualified pitcher-seasons
+   per year, independent of the decade dropdown above. */
+function renderEraTrend(){
+  const el=document.getElementById("eraTrend");
+  if(!el) return;
+  const years=[...new Set(PD_ERA_DATA.map(d=>d.year))].sort((a,b)=>a-b);
+  const maxes=[],avgs=[],mins=[];
+  years.forEach(y=>{
+    const vals=PD_ERA_DATA.filter(d=>d.year===y).map(d=>d.pd);
+    maxes.push(Math.max(...vals));
+    avgs.push(vals.reduce((a,b)=>a+b,0)/vals.length);
+    mins.push(Math.min(...vals));
+  });
+  const traces=[
+    {x:years,y:maxes,mode:"lines+markers",name:"Max",line:{color:"#2f6fed",width:2},marker:{size:4}},
+    {x:years,y:avgs,mode:"lines+markers",name:"Average",line:{color:"#171717",width:2},marker:{size:4}},
+    {x:years,y:mins,mode:"lines+markers",name:"Min",line:{color:"#c2703d",width:2},marker:{size:4}},
+  ];
+  const layout={
+    margin:{l:55,r:20,t:20,b:45},
+    paper_bgcolor:"#fff",plot_bgcolor:"#fff",hovermode:"x unified",
+    xaxis:{title:"Season",dtick:10,tick0:1980,gridcolor:"#eee",zeroline:false},
+    yaxis:{title:"PD+",gridcolor:"#eee",zeroline:false},
+    font:{family:"system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif",color:"#171717"},
+    legend:{orientation:"h",y:-0.25}
+  };
+  Plotly.react(el,traces,layout,{responsive:true,displaylogo:false});
+}
+function initEraTrend(){
+  if(!document.getElementById("eraTrend")) return;
+  renderEraTrend();
 }
 
 /* PD+ Component Leaders -- #1 all-time z-score in each component.
@@ -1081,4 +1128,5 @@ initCyYoungPredictor();
 initCyYoungLeaders();
 initCy2026Predictions();
 initEraComparison();
+initEraTrend();
 initComponentLeaders();

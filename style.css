@@ -61,6 +61,7 @@ footer{color:var(--muted);font-size:12px;margin-top:24px}
 .peak-career-detail{max-height:180px;overflow:auto}
 .peak-explain{grid-column:1 / -1;margin-top:20px;color:#666;font-size:12px;line-height:1.45}
 .peak-warning{padding:9px 11px;border:1px solid #eee;border-radius:8px;background:#fafafa;color:#666;font-size:12px;line-height:1.4}
+.pd-era-empty{padding:9px 11px;border:1px solid #eee;border-radius:8px;background:#fafafa;color:#666;font-size:12px;line-height:1.4}
 .hh-card{min-height:0}
 .hh-compare-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .hh-panel{border:1px solid #ddd;border-radius:10px;padding:14px;background:#fff}
