@@ -878,15 +878,44 @@ function initCyYoungPredictor(){
 }
 
 /* PD+ by Decade (era comparison) */
+function computeDecadeCyAccuracy(startYear,endYear){
+  let hits=0,total=0;
+  for(let year=startYear;year<=endYear;year++){
+    ["AL","NL"].forEach(lg=>{
+      const pool=DATA.filter(d=>d.season===year&&d.lg===lg);
+      if(!pool.length)return;
+      const leader=pool.reduce((a,b)=>b.pd>a.pd?b:a);
+      let actualPlayer=null;
+      const ov=CY_YEAR_OVERRIDES[`${year}|${lg}`];
+      if(ov){
+        actualPlayer=ov.player;
+      }else{
+        const actualWinner=DATA.find(d=>d.season===year&&d.lg===lg&&d.cy===1);
+        if(actualWinner){
+          actualPlayer=actualWinner.player;
+        }else{
+          const relieverWinner=RELIEVER_CY_YOUNGS.find(r=>r.year===year&&r.league===lg&&r.cy===1);
+          if(!relieverWinner)return;
+          actualPlayer=relieverWinner.player;
+        }
+      }
+      total++;
+      if(actualPlayer===leader.player)hits++;
+    });
+  }
+  return{hits,total,pct:total?100*hits/total:null};
+}
 function renderPDEra(){
   const el=document.getElementById("pdEraSelect");
   if(!el) return;
   const start=Number(el.value);
-  const rows=PD_ERA_DATA.filter(r=>r.year>=Math.max(1974,start)&&r.year<=start+9);
+  const startYear=Math.max(1974,start);
+  const endYear=start+9;
+  const rows=PD_ERA_DATA.filter(r=>r.year>=startYear&&r.year<=endYear);
   const pds=rows.map(r=>r.pd);
   const avg=pds.reduce((a,b)=>a+b,0)/pds.length;
   const range=Math.max(...pds)-Math.min(...pds);
-  const best=rows.reduce((a,b)=>b.pd>a.pd?b:a);
+  const accuracy=computeDecadeCyAccuracy(startYear,endYear);
   const n100=pds.filter(x=>x>=100).length;
   const n115=pds.filter(x=>x>=115).length;
   const n130=pds.filter(x=>x>=130).length;
@@ -903,9 +932,9 @@ function renderPDEra(){
       <div class="sub">All pitcher-seasons</div>
     </div>
     <div class="pd-era-stat">
-      <div class="label">Highest PD+</div>
-      <div class="value">${best.pd.toFixed(1)}</div>
-      <div class="sub">${best.player} \u00b7 ${best.year}</div>
+      <div class="label">PD+ Cy Young Accuracy</div>
+      <div class="value">${accuracy.pct==null?"\u2014":accuracy.pct.toFixed(0)+"%"}</div>
+      <div class="sub">${accuracy.total?`${accuracy.hits} of ${accuracy.total} awards`:"No decided awards yet"}</div>
     </div>
     <div class="pd-era-stat">
       <div class="label">PD+ 100+ Seasons</div>
