@@ -998,7 +998,15 @@ function initHome(){
 
 function initPeakFinder(){
   if(!byId("pdPeakResult")) return;
-  byId("pdPeakLength").addEventListener("change",renderPeakFinder);
+  byId("pdPeakLength").addEventListener("change",()=>{
+    if(!byId("pdPeakLength").value){
+      selectedPeakPlayer="";
+      byId("pdPeakSearch").value="";
+      byId("pdPeakSuggestions").style.display="none";
+      byId("pdPeakSelected").style.display="none";
+    }
+    renderPeakFinder();
+  });
   byId("pdPeakSearch").addEventListener("input",renderPeakSearchSuggestions);
   byId("pdPeakSearch").addEventListener("focus",renderPeakSearchSuggestions);
   byId("pdPeakClear").addEventListener("click",clearPeakPlayer);
