@@ -85,6 +85,84 @@ function renderCyYoungLeaders(){
     <div class="cy-leader-seasons">${p.wins.map(w=>`<span class="cy-leader-chip"><span class="cy-chip-top"><b>${w.season}</b><strong>${fmt(w.pd,2)}</strong></span><span class="cy-chip-bottom"><b>${w.lg}</b><strong>${w.team}</strong></span></span>`).join("")}</div>
   </div>`).join("");
 }
+
+/* Best/Worst Net PD+ Cy Youngs -- hypothetical PD+ Cy Youngs minus real Cy Youngs.
+   Career spans are researched real-world debut/final years for this specific,
+   small set of players -- not derived from the qualified-seasons dataset, since
+   that would understate careers by clipping non-qualifying rookie/decline years. */
+const CAREER_SPANS={
+  "Frank Tanana":[1973,1993],
+  "Randy Johnson":[1988,2009],
+  "Floyd Bannister":[1977,1992],
+  "Gerrit Cole":[2013,null],
+  "Justin Verlander":[2005,null],
+  "Kevin Brown":[1986,2005],
+  "Nolan Ryan Jr.":[1966,1993],
+  "Pedro Martínez":[1992,2009],
+  "Roger Clemens":[1984,2007],
+  "Ron Guidry":[1975,1988],
+  "Tom Seaver":[1967,1986],
+  "Blake Snell":[2016,null],
+  "Jim Palmer":[1965,1984],
+  "Steve Carlton":[1965,1988],
+  "Tom Glavine":[1987,2008]
+};
+function computeNetCyYoungBoards(){
+  const bySeasonLg=new Map();
+  DATA.forEach(d=>{
+    if(d.lg!=="AL"&&d.lg!=="NL")return;
+    const key=d.season+"|"+d.lg;
+    const cur=bySeasonLg.get(key);
+    if(!cur||d.pd>cur.pd)bySeasonLg.set(key,d);
+  });
+  const hypotheticalWinsByPlayer=new Map();
+  bySeasonLg.forEach(d=>{
+    hypotheticalWinsByPlayer.set(d.player,(hypotheticalWinsByPlayer.get(d.player)||0)+1);
+  });
+  const actualWinsByPlayer=new Map();
+  DATA.forEach(d=>{
+    if(d.cy===1)actualWinsByPlayer.set(d.player,(actualWinsByPlayer.get(d.player)||0)+1);
+  });
+  const allPlayers=new Set([...actualWinsByPlayer.keys(),...hypotheticalWinsByPlayer.keys()]);
+  const results=[...allPlayers].map(player=>{
+    const actual=actualWinsByPlayer.get(player)||0;
+    const hypothetical=hypotheticalWinsByPlayer.get(player)||0;
+    return{player,actual,hypothetical,net:hypothetical-actual};
+  });
+  const best=results.filter(r=>r.net>=2).sort((a,b)=>b.net-a.net||a.player.localeCompare(b.player));
+  const worst=results.filter(r=>r.net<=-2).sort((a,b)=>a.net-b.net||a.player.localeCompare(b.player));
+  return{best,worst};
+}
+function netCySpanText(player){
+  const span=CAREER_SPANS[player];
+  if(!span)return"";
+  const[start,end]=span;
+  return`${start}\u2013${end==null?"Present":end}`;
+}
+function netCyRowHTML(r,cls){
+  const span=netCySpanText(r.player);
+  const netLabel=r.net>0?`+${r.net}`:`\u2212${Math.abs(r.net)}`;
+  return`<div class="net-row ${cls}">
+    <div>
+      <div class="net-name-line"><span class="net-name">${r.player}</span>${span?`<span class="net-span">${span}</span>`:""}</div>
+      <div class="net-breakdown">${r.hypothetical} PD+ Cy Young${r.hypothetical===1?"":"s"} \u00b7 ${r.actual} real Cy Young${r.actual===1?"":"s"}</div>
+    </div>
+    <div class="net-value">${netLabel}</div>
+  </div>`;
+}
+function renderNetCyYoungBoards(){
+  const bestEl=document.getElementById("cyNetBest");
+  const worstEl=document.getElementById("cyNetWorst");
+  if(!bestEl||!worstEl)return;
+  const{best,worst}=computeNetCyYoungBoards();
+  bestEl.innerHTML=best.map(r=>netCyRowHTML(r,"net-positive")).join("");
+  worstEl.innerHTML=worst.map(r=>netCyRowHTML(r,"net-negative")).join("");
+}
+function initNetCyYoungBoards(){
+  if(!document.getElementById("cyNetBest"))return;
+  renderNetCyYoungBoards();
+}
+
 function renderCy2026Predictions(){
   const pool=DATA.filter(d=>d.season===2026);
   const components=[["ERA","eraz"],["K-BB%","kbbz"],["BAA","baaz"],["HR/9","hr9z"],["IP","ipz"],["WPA","wpaz"]];
@@ -1126,6 +1204,7 @@ initPeakFinder();
 initHeadToHead();
 initCyYoungPredictor();
 initCyYoungLeaders();
+initNetCyYoungBoards();
 initCy2026Predictions();
 initEraComparison();
 initEraTrend();

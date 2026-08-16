@@ -279,3 +279,15 @@ header h1{font-size:28px}
 .component-leader-overall-score{text-align:right;flex-shrink:0}
 .component-leader-overall .component-leader-score{margin-top:0}
 .component-leader-overall .component-leader-rank{margin-top:4px;padding-top:0;text-align:right}
+
+/* Best/Worst Net PD+ Cy Youngs boards */
+.net-cy-card{padding:18px 20px}
+.net-row{display:grid;grid-template-columns:minmax(0,1fr) 70px;gap:12px;align-items:center;padding:12px 0;border-bottom:1px solid #e6e6e6}
+.net-row:last-child{border-bottom:0}
+.net-name-line{display:flex;align-items:baseline;gap:7px;flex-wrap:wrap}
+.net-name{font-size:14px;font-weight:700}
+.net-span{font-size:11px;color:#999;font-weight:400}
+.net-breakdown{font-size:11px;color:#666;margin-top:2px}
+.net-value{font-size:20px;font-weight:800;text-align:right;white-space:nowrap}
+.net-positive .net-value{color:#0f6e56}
+.net-negative .net-value{color:#a32d2d}
