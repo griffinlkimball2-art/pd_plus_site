@@ -961,6 +961,16 @@ function renderPDEra(){
       </div>
       <div class="pd">${r.pd.toFixed(1)}</div>
     </div>`).join("");
+
+  const bottom=[...rows].sort((a,b)=>a.pd-b.pd).slice(0,5).map((r,i)=>({...r,rank:i+1}));
+  document.getElementById("pdEraBottomSeasons").innerHTML=[...bottom].reverse().map(r=>`
+    <div class="pd-era-best">
+      <div>
+        <div class="player">${r.rank}. ${r.player}</div>
+        <div class="season">${r.year}</div>
+      </div>
+      <div class="pd">${r.pd.toFixed(1)}</div>
+    </div>`).join("");
 }
 function initEraComparison(){
   const el=document.getElementById("pdEraSelect");
