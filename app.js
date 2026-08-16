@@ -41,7 +41,7 @@ function profile(i){
  <div class="bar" title="Top ${c.percentile.toFixed(1)}% of qualified pitcher-seasons"><i style="width:${Math.max(0,Math.min(100,c.percentile))}%"></i></div>`).join("")}
  <p class="note mt-14">Component bars show the pitcher's percentile position in the full qualified pitcher-season distribution, with the best z-score at 100%.</p>`;
 }
-function row(d){return `<tr data-id="${d.id}"><td>${d.rank}</td><td>${d.season}</td><td>${d.player}</td><td>${d.team}</td><td><b>${fmt(d.pd,2)}</b></td><td>${fmt(d.era,2)}</td><td>${fmt(d.kbb,1)}%</td><td>${fmtBAA(d.baa)}</td><td>${fmt(d.hr9,2)}</td><td>${fmt(d.ip,1)}</td><td>${fmt(d.wpa,2)}</td></tr>`}
+function row(d){return `<tr data-id="${d.id}"><td>${d.rank}</td><td>${d.season}</td><td>${d.player}</td><td>${d.team}</td><td><b>${fmt(d.pd,2)}</b></td><td>${fmt(d.war,1)}</td><td>${fmt(d.era,2)}</td><td>${fmt(d.kbb,1)}%</td><td>${fmtBAA(d.baa)}</td><td>${fmt(d.hr9,2)}</td><td>${fmt(d.ip,1)}</td><td>${fmt(d.wpa,2)}</td></tr>`}
 function bindRows(sel){document.querySelectorAll(sel+" tbody tr").forEach(tr=>tr.onclick=()=>profile(+tr.dataset.id))}
 function ordinal(n){const s=["th","st","nd","rd"],v=n%100;return n+(s[(v-20)%10]||s[v]||s[0])}
 function computeCyYoungLeaders(minCount=4){
@@ -989,7 +989,7 @@ function initHome(){
   byId("from").value=seasons[0];byId("to").value=seasons.at(-1);
   document.querySelectorAll("#leaderTable th").forEach(th=>th.onclick=()=>{const k=th.dataset.key;if(sortKey===k)sortDir*=-1;else{sortKey=k;sortDir=1}renderTable()});
   ["search","from","to","minpd","maxpd"].forEach(id=>byId(id).addEventListener("input",applyFilters));
-  byId("reset").onclick=()=>{byId("search").value="";byId("from").value=seasons[0];byId("to").value=seasons.at(-1);byId("minpd").value=0;byId("maxpd").value="";applyFilters()};
+  byId("reset").onclick=()=>{byId("search").value="";byId("from").value=seasons[0];byId("to").value=seasons.at(-1);byId("minpd").value="";byId("maxpd").value="";applyFilters()};
   window.onresize=renderScatter;
   renderTop();
   applyFilters();
