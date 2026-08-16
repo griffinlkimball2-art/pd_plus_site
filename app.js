@@ -6,6 +6,7 @@
 let filtered=DATA.slice(),sortKey="rank",sortDir=1;
 const fmt=(x,d=2)=>x==null||Number.isNaN(x)?"—":Number(x).toFixed(d); const fmtBAA=(x)=>x==null||Number.isNaN(x)?"—":Number(x).toFixed(3).replace(/^(-?)0\./,"$1.");
 const seasons=[...new Set(DATA.map(d=>d.season))].sort((a,b)=>a-b);
+const CURRENT_SEASON=seasons[seasons.length-1];
 const byId=id=>document.getElementById(id);
 function fillSelect(id){byId(id).innerHTML=seasons.map(v=>`<option value="${v}">${v}</option>`).join("")}
 function applyFilters(){
@@ -163,13 +164,13 @@ function initNetCyYoungBoards(){
   renderNetCyYoungBoards();
 }
 
-function renderCy2026Predictions(){
-  const pool=DATA.filter(d=>d.season===2026);
+function renderCurrentSeasonPredictions(){
+  const pool=DATA.filter(d=>d.season===CURRENT_SEASON);
   const components=[["ERA","eraz"],["K-BB%","kbbz"],["BAA","baaz"],["HR/9","hr9z"],["IP","ipz"],["WPA","wpaz"]];
   function rankIn(list,key,val){return list.filter(d=>d[key]>val).length+1}
   function panelHTML(lg,label){
     const lgPool=pool.filter(d=>d.lg===lg).sort((a,b)=>b.pd-a.pd);
-    if(!lgPool.length) return `<div class="cy-panel-kicker">${label}</div><p class="note">No qualified 2026 pitchers yet.</p>`;
+    if(!lgPool.length) return `<div class="cy-panel-kicker">${label}</div><p class="note">No qualified ${CURRENT_SEASON} pitchers yet.</p>`;
     const winner=lgPool[0],runnerUp=lgPool[1];
     const rows=components.map(([name,zkey])=>{
       const z=winner[zkey],rank=rankIn(pool,zkey,z);
@@ -181,13 +182,13 @@ function renderCy2026Predictions(){
     }).join("");
     return `<div class="cy-panel-kicker">${label}</div>
       <div class="cy-player">${winner.player}</div>
-      <div class="cy-meta">2026 ${lg} · ${winner.team}</div>
+      <div class="cy-meta">${CURRENT_SEASON} ${lg} · ${winner.team}</div>
       <div class="cy-score-row"><div class="cy-score">${fmt(winner.pd,2)}</div><div class="cy-score-label">PD+</div></div>
       <div class="cy-rank">#${winner.rank} since 1974</div>
       <div class="cy26-breakdown">
-        <div class="cy26-breakdown-title">2026 Component Breakdown</div>
+        <div class="cy26-breakdown-title">${CURRENT_SEASON} Component Breakdown</div>
         <div class="cy26-component-list">${rows}</div>
-        <div class="cy26-breakdown-foot">Out of ${pool.length} qualified pitchers in 2026.</div>
+        <div class="cy26-breakdown-foot">Out of ${pool.length} qualified pitchers in ${CURRENT_SEASON}.</div>
         ${runnerUp?`<div class="cy26-runner-up-box">
           <div class="cy26-runner-up-label">Runner-Up</div>
           <div class="cy26-runner-up-player">${runnerUp.player}</div>
@@ -195,6 +196,10 @@ function renderCy2026Predictions(){
         </div>`:""}
       </div>`;
   }
+  const headingEl=byId("cySeasonHeading");
+  if(headingEl) headingEl.textContent=`${CURRENT_SEASON} PD+ Cy Young Predictions`;
+  const subtitleEl=byId("cySeasonSubtitle");
+  if(subtitleEl) subtitleEl.textContent=`The highest-PD+ pitcher currently in each league, based on the ${CURRENT_SEASON} data in the dashboard.`;
   const alEl=byId("cyPredAL"),nlEl=byId("cyPredNL");
   if(alEl) alEl.innerHTML=panelHTML("AL","American League");
   if(nlEl) nlEl.innerHTML=panelHTML("NL","National League");
@@ -203,10 +208,10 @@ function renderTop(){
  const rows=DATA.slice().sort((a,b)=>b.pd-a.pd).slice(0,15);
  byId("topTable").querySelector("tbody").innerHTML=rows.map(d=>{
    const won=d.cy===1;
-   const ongoing=d.season===2026;
+   const ongoing=d.season===CURRENT_SEASON;
    let signifier="—";
    if(won) signifier='<span class="pill" title="Cy Young Award winner">CY</span>';
-   if(ongoing) signifier='<span class="pill" title="2026 season is ongoing">LIVE</span>';
+   if(ongoing) signifier=`<span class="pill" title="${CURRENT_SEASON} season is ongoing">LIVE</span>`;
    return `<tr data-id="${d.id}">
      <td>${d.rank}</td><td>${d.season}</td>
      <td>${d.player}</td><td>${d.team}</td><td>${fmt(d.age,0)}</td><td><b>${fmt(d.pd,2)}</b></td><td>${signifier}</td>
@@ -1193,9 +1198,9 @@ function initCyYoungLeaders(){
   renderCyYoungLeaders();
 }
 
-function initCy2026Predictions(){
+function initCurrentSeasonPredictions(){
   if(!byId("cyPredAL")) return;
-  renderCy2026Predictions();
+  renderCurrentSeasonPredictions();
 }
 
 /* Run every page init. Each one is a no-op if its markup isn't on the page. */
@@ -1205,7 +1210,7 @@ initHeadToHead();
 initCyYoungPredictor();
 initCyYoungLeaders();
 initNetCyYoungBoards();
-initCy2026Predictions();
+initCurrentSeasonPredictions();
 initEraComparison();
 initEraTrend();
 initComponentLeaders();

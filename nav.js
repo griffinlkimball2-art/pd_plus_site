@@ -3,6 +3,7 @@
 (function () {
   const NAV_ITEMS = [
     ["index.html", "Home"],
+    ["this-season.html", "This Season"],
     ["compare.html", "Compare"],
     ["peak-finder.html", "Peak Finder"],
     ["cy-young.html", "Cy Young"],
