@@ -529,7 +529,9 @@ function hhGetValue(side){
     return {
       player,
       yearLabel:`${start}\u2013${end}`,
-      subtitle:`${start}\u2013${end} span \u00b7 ${rows.length} season${rows.length===1?"":"s"}`,
+      subtitle:`${start}\u2013${end} span`,
+      seasonCount:rows.length,
+      qualifyingYears:rows.map(d=>d.season),
       ...avg
     };
   }
@@ -584,8 +586,12 @@ function hhRender(side,val){
     el.innerHTML=`<div class="hh-result-empty">${hhEsc(hhEmptyMessage(side))}</div>`;
     return;
   }
+  let subtitleHTML=hhEsc(val.subtitle);
+  if(val.qualifyingYears){
+    subtitleHTML+=` \u00b7 <span class="hh-season-count" tabindex="0">${val.seasonCount} season${val.seasonCount===1?"":"s"}<span class="hh-season-tooltip">${val.qualifyingYears.join(", ")}</span></span>`;
+  }
   el.innerHTML=`<div class="hh-result-player">${hhEsc(val.player)}</div>
-    <div class="hh-result-season">${hhEsc(val.subtitle)}</div>
+    <div class="hh-result-season">${subtitleHTML}</div>
     <div class="hh-result-pd">${hhFmt(val.pd)}</div>
     <div class="hh-result-label">Pitching Dominance+</div>
     <div class="hh-result-meta">${hhModeMeta()}</div>`;
