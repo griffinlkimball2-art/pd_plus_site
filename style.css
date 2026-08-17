@@ -58,7 +58,6 @@ footer{color:var(--muted);font-size:12px;margin-top:24px}
 .peak-pill{border:1px solid #ddd;border-radius:8px;padding:7px 9px;background:#fff;min-width:0}
 .peak-pill .year{font-size:11px;color:#777}
 .peak-pill .pd{font-size:14px;font-weight:750;margin-top:2px}
-.peak-career-detail{max-height:180px;overflow:auto}
 .peak-explain{grid-column:1 / -1;margin-top:20px;color:#666;font-size:12px;line-height:1.45}
 .peak-warning{padding:9px 11px;border:1px solid #eee;border-radius:8px;background:#fafafa;color:#666;font-size:12px;line-height:1.4}
 .pd-era-empty{padding:9px 11px;border:1px solid #eee;border-radius:8px;background:#fafafa;color:#666;font-size:12px;line-height:1.4}
