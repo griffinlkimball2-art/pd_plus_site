@@ -164,6 +164,46 @@ function initNetCyYoungBoards(){
   renderNetCyYoungBoards();
 }
 
+/* Best Non-Cy Young Seasons by PD+ -- top 5 PD+ seasons that didn't win the
+   real award, excluding the current in-progress season (which would otherwise
+   always trivially qualify since no winner's been decided yet). Voting
+   finishes are researched real-world facts for this specific, small set of
+   seasons -- not derivable from the dataset itself. */
+const CY_VOTING_FINISHES={
+  "2002|Pedro Martínez":{ordinal:"2nd",aheadPlayers:["Barry Zito"]},
+  "2004|Randy Johnson":{ordinal:"2nd",aheadPlayers:["Roger Clemens"]},
+  "1997|Randy Johnson":{ordinal:"2nd",aheadPlayers:["Roger Clemens"]},
+  "2003|Pedro Martínez":{ordinal:"3rd",aheadPlayers:["Roy Halladay","Esteban Loaiza"]},
+  "2019|Gerrit Cole":{ordinal:"2nd",aheadPlayers:["Justin Verlander"]}
+};
+function computeBestNonCyYoung(){
+  return DATA.filter(d=>d.cy!==1&&d.lg!=="2LG"&&d.season!==CURRENT_SEASON)
+    .sort((a,b)=>b.pd-a.pd)
+    .slice(0,5);
+}
+function bcyVoteText(season,player){
+  const info=CY_VOTING_FINISHES[`${season}|${player}`];
+  if(!info)return"Voting finish not yet added.";
+  return`Finished ${info.ordinal}, behind ${info.aheadPlayers.map(p=>`<b>${p}</b>`).join(" &amp; ")}`;
+}
+function renderBestNonCyYoung(){
+  const el=byId("bestNonCyYoung");
+  if(!el)return;
+  const rows=computeBestNonCyYoung();
+  el.innerHTML=rows.map((d,i)=>`<div class="bcy-row">
+    <div class="bcy-rank">${i+1}</div>
+    <div>
+      <div class="bcy-player-line">${d.player}<span class="bcy-meta">${d.season} ${d.lg} \u00b7 ${d.team}</span></div>
+      <div class="bcy-vote">${bcyVoteText(d.season,d.player)}</div>
+    </div>
+    <div class="bcy-value">${fmt(d.pd,2)}</div>
+  </div>`).join("");
+}
+function initBestNonCyYoung(){
+  if(!byId("bestNonCyYoung"))return;
+  renderBestNonCyYoung();
+}
+
 function renderCurrentSeasonPredictions(){
   const pool=DATA.filter(d=>d.season===CURRENT_SEASON);
   const components=[["ERA","eraz"],["K-BB%","kbbz"],["BAA","baaz"],["HR/9","hr9z"],["IP","ipz"],["WPA","wpaz"]];
@@ -1263,6 +1303,7 @@ initHeadToHead();
 initCyYoungPredictor();
 initCyYoungLeaders();
 initNetCyYoungBoards();
+initBestNonCyYoung();
 initCurrentSeasonPredictions();
 initSeasonCharts();
 initEraComparison();

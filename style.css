@@ -290,3 +290,13 @@ header h1{font-size:28px}
 .net-value{font-size:20px;font-weight:800;text-align:right;white-space:nowrap}
 .net-positive .net-value{color:#0f6e56}
 .net-negative .net-value{color:#a32d2d}
+
+/* Best Non-Cy Young Seasons by PD+ */
+.bcy-row{display:grid;grid-template-columns:28px minmax(0,1fr) 70px;gap:12px;align-items:center;padding:13px 0;border-bottom:1px solid #e6e6e6}
+.bcy-row:last-child{border-bottom:0}
+.bcy-rank{font-size:15px;font-weight:800;color:#aaa}
+.bcy-player-line{font-size:14px;font-weight:700}
+.bcy-meta{font-size:11px;color:#999;font-weight:400;margin-left:6px}
+.bcy-vote{font-size:11px;color:#666;margin-top:2px}
+.bcy-vote b{color:var(--ink);font-weight:700}
+.bcy-value{font-size:20px;font-weight:800;text-align:right}
