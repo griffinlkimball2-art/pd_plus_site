@@ -8,6 +8,7 @@
     ["peak-finder.html", "Peak Finder"],
     ["cy-young.html", "Cy Young"],
     ["eras.html", "Eras"],
+    ["goats.html", "GOATs"],
     ["about.html", "About"],
   ];
 

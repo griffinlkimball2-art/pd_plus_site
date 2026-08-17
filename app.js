@@ -76,6 +76,76 @@ function computeCyYoungLeaders(minCount=4){
     return {...p,rankLabel:(tied?"T-":"")+ordinal(rank)};
   });
 }
+
+/* GOATs of PD+ -- a fixed, curated set of three all-time greats. Who's
+   included is hardcoded by design, but every stat shown for them is
+   computed live from DATA, not hardcoded, so it stays accurate as the
+   dataset refreshes. Reuses CAREER_SPANS (defined further below) and the
+   same hypothetical-Cy-Young logic as computeCyYoungLeaders. */
+const GOAT_PLAYERS=["Pedro Martínez","Randy Johnson","Roger Clemens"];
+function computeGoatsData(){
+  const cyLeaders=computeCyYoungLeaders(0);
+  const cyByPlayer=new Map(cyLeaders.map(p=>[p.player,p]));
+  const results=GOAT_PLAYERS.map(player=>{
+    const rows=DATA.filter(d=>d.player===player);
+    const avg=rows.reduce((a,b)=>a+b.pd,0)/rows.length;
+    const best=rows.reduce((a,b)=>b.pd>a.pd?b:a);
+    const realCY=rows.filter(d=>d.cy===1).length;
+    const cyInfo=cyByPlayer.get(player);
+    const hypoCY=cyInfo?cyInfo.count:0;
+    const hypoYears=cyInfo?cyInfo.wins.map(w=>w.season):[];
+    const span=CAREER_SPANS[player];
+    return{
+      player,
+      span:span?`${span[0]}\u2013${span[1]==null?"Present":span[1]}`:"",
+      seasons:rows.length,
+      avg,
+      bestSeason:best.season,
+      bestPd:best.pd,
+      realCY,hypoCY,
+      net:hypoCY-realCY,
+      hypoYears
+    };
+  });
+  results.sort((a,b)=>b.avg-a.avg);
+  return results;
+}
+function renderGoats(){
+  const el=byId("goatsGrid");
+  if(!el)return;
+  const data=computeGoatsData();
+  el.innerHTML=data.map((p,i)=>{
+    const netLabel=p.net>0?`+${p.net}`:(p.net<0?`\u2212${Math.abs(p.net)}`:"0");
+    return`<div class="goat-card">
+    <div class="goat-rank">#${i+1}</div>
+    <div class="goat-name">${p.player}</div>
+    <div class="goat-span">${p.span}</div>
+    <div class="goat-avg-block">
+      <div class="goat-avg">${fmt(p.avg,2)}</div>
+      <div class="goat-avg-label">Career Average PD+</div>
+      <div class="goat-avg-sub">${p.seasons} qualified seasons</div>
+    </div>
+    <div class="goat-stat-block">
+      <div class="goat-stat-label">Best Season</div>
+      <div class="goat-stat-value">${p.bestSeason} \u00b7 ${fmt(p.bestPd,2)} PD+</div>
+    </div>
+    <div class="goat-cy-row">
+      <div class="goat-cy-item"><div class="goat-cy-num">${p.hypoCY}</div><div class="goat-cy-label">PD+ CYs</div></div>
+      <div class="goat-cy-item"><div class="goat-cy-num">${p.realCY}</div><div class="goat-cy-label">Real CYs</div></div>
+      <div class="goat-cy-item"><div class="goat-cy-net">${netLabel}</div><div class="goat-cy-label">Net</div></div>
+    </div>
+    <div class="goat-years-block">
+      <div class="goat-years-label">PD+ Cy Young Years</div>
+      <div class="goat-year-chips">${p.hypoYears.map(y=>`<span class="goat-year-chip">${y}</span>`).join("")}</div>
+    </div>
+  </div>`;
+  }).join("");
+}
+function initGoats(){
+  if(!byId("goatsGrid"))return;
+  renderGoats();
+}
+
 function renderCyYoungLeaders(){
   const el=byId("pdCyYoungLeaderboardBody");
   if(!el) return;
@@ -1310,6 +1380,7 @@ initCyYoungPredictor();
 initCyYoungLeaders();
 initNetCyYoungBoards();
 initBestNonCyYoung();
+initGoats();
 initCurrentSeasonPredictions();
 initSeasonCharts();
 initEraComparison();

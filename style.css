@@ -211,6 +211,7 @@ footer{color:var(--muted);font-size:12px;margin-top:24px}
 
 @media(max-width:900px){
 .cards,.two,.three{grid-template-columns:1fr}
+.goat-grid{grid-template-columns:1fr}
 header h1{font-size:28px}
 .component-leaders-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
 .hh-compare-grid{grid-template-columns:1fr}
@@ -305,3 +306,29 @@ header h1{font-size:28px}
 .hh-season-count{position:relative;cursor:help;border-bottom:1px dotted #999;font-weight:600}
 .hh-season-tooltip{position:absolute;left:50%;bottom:100%;transform:translateX(-50%);margin-bottom:6px;background:#171717;color:#fff;font-size:11px;font-weight:400;line-height:1.5;padding:7px 10px;border-radius:6px;white-space:normal;max-width:220px;text-align:center;opacity:0;visibility:hidden;transition:opacity .15s;pointer-events:none;z-index:20}
 .hh-season-count:hover .hh-season-tooltip,.hh-season-count:focus .hh-season-tooltip{opacity:1;visibility:visible}
+
+/* GOATs of PD+ page */
+.pagehead{margin-bottom:18px}
+.pagehead h2{font-size:22px;margin:0 0 6px;font-weight:800}
+.pagehead .section-subtitle{font-size:13px;color:#666;margin:0;line-height:1.5;max-width:640px}
+.goat-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.goat-card{background:var(--card,#fff);border:1px solid var(--line,#ddd);border-radius:12px;padding:20px}
+.goat-rank{font-size:12px;font-weight:700;color:#999;text-transform:uppercase;letter-spacing:.06em}
+.goat-name{font-size:19px;font-weight:800;margin-top:4px}
+.goat-span{font-size:12px;color:#999;margin-top:2px}
+.goat-avg-block{margin-top:16px;padding-top:14px;border-top:1px solid #eee}
+.goat-avg{font-size:34px;font-weight:800;line-height:1}
+.goat-avg-label{font-size:11px;color:#666;text-transform:uppercase;letter-spacing:.05em;margin-top:4px}
+.goat-avg-sub{font-size:11px;color:#999;margin-top:2px}
+.goat-stat-block{margin-top:14px;padding-top:14px;border-top:1px solid #eee}
+.goat-stat-label{font-size:10px;color:#999;text-transform:uppercase;letter-spacing:.05em;font-weight:700}
+.goat-stat-value{font-size:15px;font-weight:700;margin-top:3px}
+.goat-cy-row{display:flex;justify-content:space-between;align-items:baseline;margin-top:14px;padding-top:14px;border-top:1px solid #eee}
+.goat-cy-item{text-align:center}
+.goat-cy-num{font-size:18px;font-weight:800}
+.goat-cy-label{font-size:9px;color:#999;text-transform:uppercase;letter-spacing:.04em;margin-top:2px}
+.goat-cy-net{font-size:18px;font-weight:800;color:#0f6e56}
+.goat-years-block{margin-top:14px;padding-top:14px;border-top:1px solid #eee}
+.goat-years-label{font-size:10px;color:#999;text-transform:uppercase;letter-spacing:.05em;font-weight:700;margin-bottom:8px}
+.goat-year-chips{display:flex;flex-wrap:wrap;gap:6px}
+.goat-year-chip{background:#f3f3f3;border-radius:6px;padding:5px 9px;font-size:12px;font-weight:700}
