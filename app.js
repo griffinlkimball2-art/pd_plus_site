@@ -1250,12 +1250,12 @@ function renderPDEra(){
   document.getElementById("pdEraStats").innerHTML=`
     <div class="pd-era-stat">
       <div class="label">Average PD+</div>
-      <div class="value">${avg.toFixed(1)}</div>
+      <div class="value">${avg.toFixed(2)}</div>
       <div class="sub">All pitcher-seasons</div>
     </div>
     <div class="pd-era-stat">
       <div class="label">PD+ Range</div>
-      <div class="value">${range.toFixed(1)}</div>
+      <div class="value">${range.toFixed(2)}</div>
       <div class="sub">All pitcher-seasons</div>
     </div>
     <div class="pd-era-stat">
@@ -1286,7 +1286,7 @@ function renderPDEra(){
         <div class="player">${i+1}. ${r.player}</div>
         <div class="season">${r.year}</div>
       </div>
-      <div class="pd">${r.pd.toFixed(1)}</div>
+      <div class="pd">${r.pd.toFixed(2)}</div>
     </div>`).join("");
 
   const bottom=[...rows].sort((a,b)=>a.pd-b.pd).slice(0,5).map((r,i)=>({...r,rank:i+1}));
@@ -1296,7 +1296,7 @@ function renderPDEra(){
         <div class="player">${r.rank}. ${r.player}</div>
         <div class="season">${r.year}</div>
       </div>
-      <div class="pd">${r.pd.toFixed(1)}</div>
+      <div class="pd">${r.pd.toFixed(2)}</div>
     </div>`).join("");
 }
 function initEraComparison(){
