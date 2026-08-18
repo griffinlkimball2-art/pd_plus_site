@@ -1363,16 +1363,22 @@ function renderSeasonSearchResult(d){
     const percentile=DATA.length>1?100*(1-(rank-1)/(DATA.length-1)):100;
     return{label,key,rank,percentile};
   });
-  el.innerHTML=`<div class="label">${d.season} season</div><h3>${d.player}</h3><div class="big">${fmt(d.pd,2)}</div><div class="label">Pitching Dominance+</div>
+  el.innerHTML=`<div class="label">${d.season} season</div><h3>${d.player}</h3>
+    <div style="display:flex;align-items:baseline;gap:10px;flex-wrap:wrap">
+      <div class="big">${fmt(d.pd,2)}</div>
+      <span class="season-search-rank">#${d.rank.toLocaleString()} all-time</span>
+      ${d.cy===1?'<span class="pill" title="Cy Young Award winner">CY</span>':""}
+    </div>
+    <div class="label">Pitching Dominance+</div>
     <hr class="divider">
     <div class="stat-grid">
       <div><b>Team</b>${d.team}</div>
       <div><b>LG</b>${d.lg}</div>
       <div><b>Age</b>${fmt(d.age,0)}</div>
-      <div><b>fWAR</b>${fmt(d.war,1)}</div>
-      <div><b>BABIP</b>${fmtBAA(d.babip)}</div>
       <div><b>W-L</b>${d.w}-${d.l}</div>
+      <div><b class="fwar-label">fWAR</b>${fmt(d.war,1)}</div>
       <div><b>ERA</b>${fmt(d.era,2)}</div>
+      <div><b>FIP</b>${fmt(d.fip,2)}</div>
       <div><b>K-BB%</b>${fmt(d.kbb,1)}%</div>
       <div><b>BAA</b>${fmtBAA(d.baa)}</div>
       <div><b>HR/9</b>${fmt(d.hr9,2)}</div>

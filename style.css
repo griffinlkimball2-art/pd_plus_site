@@ -339,3 +339,9 @@ header h1{font-size:28px}
 .stat-grid div b{display:block;font-size:11px;color:#666;font-weight:600;text-transform:uppercase;letter-spacing:.03em;margin-bottom:2px}
 .stat-grid div{font-size:15px;font-weight:700}
 .comp-title{font-size:13px;font-weight:700;margin-bottom:10px}
+
+/* CY/LIVE signifier badge (Top 15 table + Season Search) -- was previously
+   completely unstyled, plain text with no visual treatment. */
+.pill{display:inline-block;font-size:10px;font-weight:800;letter-spacing:.04em;padding:3px 8px;border-radius:999px;background:#171717;color:#fff;vertical-align:middle}
+.season-search-rank{font-size:12px;color:var(--muted,#666);font-weight:650;white-space:nowrap}
+.stat-grid .fwar-label{text-transform:none}
