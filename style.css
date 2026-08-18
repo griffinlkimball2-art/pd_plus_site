@@ -235,6 +235,7 @@ header h1{font-size:28px}
 @media (max-width:560px){
 .peak-detail{grid-template-columns:repeat(2,minmax(0,1fr))}
 .stat-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+.weight-sliders{grid-template-columns:repeat(2,minmax(0,1fr))}
 }
 
 @media(max-width:700px){
@@ -345,3 +346,15 @@ header h1{font-size:28px}
 .pill{display:inline-block;font-size:10px;font-weight:800;letter-spacing:.04em;padding:3px 8px;border-radius:999px;background:#171717;color:#fff;vertical-align:middle}
 .season-search-rank{font-size:12px;color:var(--muted,#666);font-weight:650;white-space:nowrap}
 .stat-grid .fwar-label{text-transform:none}
+
+/* Custom PD+ Weights panel (Explore the Leaderboard) */
+.weight-panel{border:1px solid #eee;border-radius:10px;padding:14px 16px;margin-top:14px;background:#fafafa}
+.weight-panel-title{font-size:13px;font-weight:700;margin-bottom:4px}
+.weight-sliders{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px 22px;margin-top:10px}
+.weight-slider label{font-size:12px;color:#666;display:flex;justify-content:space-between}
+.weight-slider label span{font-weight:700;color:var(--ink)}
+.weight-slider input[type=range]{width:100%;margin-top:4px}
+.weight-panel-footer{display:flex;align-items:center;gap:14px;margin-top:14px;flex-wrap:wrap}
+.weight-total{font-size:13px}
+.weight-error{font-size:12px;color:#a32d2d;font-weight:600}
+.pd-cell-official{display:block;font-size:10px;color:#999;font-weight:400;margin-top:1px}

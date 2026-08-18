@@ -9,11 +9,90 @@ const seasons=[...new Set(DATA.map(d=>d.season))].sort((a,b)=>a-b);
 const CURRENT_SEASON=seasons[seasons.length-1];
 const byId=id=>document.getElementById(id);
 function fillSelect(id){byId(id).innerHTML=seasons.map(v=>`<option value="${v}">${v}</option>`).join("")}
+
+/* Custom PD+ Weights (Explore the Leaderboard only). Scoped deliberately:
+   only this table's PD+/Rank columns, sort, and min/max filter are affected.
+   The scatter chart, Top 15, and every other tool on the site always read
+   d.pd/d.rank directly off DATA, which this never mutates. */
+let customWeightsActive=false;
+let customPdMap=null;
+function computeCustomPdMap(weights){
+  const comps=DATA.map(d=>({
+    id:d.id,
+    comp:weights.eraz*(d.eraz??0)+weights.kbbz*(d.kbbz??0)+weights.baaz*(d.baaz??0)+weights.hr9z*(d.hr9z??0)+weights.ipz*(d.ipz??0)+weights.wpaz*(d.wpaz??0)
+  }));
+  const n=comps.length;
+  const mean=comps.reduce((a,b)=>a+b.comp,0)/n;
+  const variance=comps.reduce((a,b)=>a+(b.comp-mean)**2,0)/n;
+  const sd=Math.sqrt(variance);
+  const withPd=comps.map(c=>({id:c.id,pd:100+10*(c.comp-mean)/sd}));
+  const sorted=[...withPd].sort((a,b)=>b.pd-a.pd);
+  const rankMap=new Map();
+  sorted.forEach((r,i)=>rankMap.set(r.id,i+1));
+  const map=new Map();
+  withPd.forEach(r=>map.set(r.id,{pd:r.pd,rank:rankMap.get(r.id)}));
+  return map;
+}
+function readWeightSliders(){
+  return{
+    eraz:Number(byId("wEra").value),
+    kbbz:Number(byId("wKbb").value),
+    baaz:Number(byId("wBaa").value),
+    hr9z:Number(byId("wHr9").value),
+    ipz:Number(byId("wIp").value),
+    wpaz:Number(byId("wWpa").value)
+  };
+}
+function updateWeightSliderLabels(){
+  const w=readWeightSliders();
+  byId("wEraVal").textContent=w.eraz;
+  byId("wKbbVal").textContent=w.kbbz;
+  byId("wBaaVal").textContent=w.baaz;
+  byId("wHr9Val").textContent=w.hr9z;
+  byId("wIpVal").textContent=w.ipz;
+  byId("wWpaVal").textContent=w.wpaz;
+  const total=w.eraz+w.kbbz+w.baaz+w.hr9z+w.ipz+w.wpaz;
+  byId("weightTotal").textContent=total;
+  return total;
+}
+function updatePdHeaderLabels(){
+  const rankHeader=byId("rankHeader"),pdHeader=byId("pdHeader");
+  if(!rankHeader||!pdHeader)return;
+  rankHeader.textContent=customWeightsActive?"Custom Rank":"Rank";
+  pdHeader.textContent=customWeightsActive?"Custom PD+":"PD+";
+}
+function lockInWeights(){
+  const total=updateWeightSliderLabels();
+  if(total!==100){
+    byId("weightError").textContent=`Weights must sum to 100 \u2014 currently ${total}.`;
+    return;
+  }
+  byId("weightError").textContent="";
+  const w=readWeightSliders();
+  const fractions={eraz:w.eraz/100,kbbz:w.kbbz/100,baaz:w.baaz/100,hr9z:w.hr9z/100,ipz:w.ipz/100,wpaz:w.wpaz/100};
+  customPdMap=computeCustomPdMap(fractions);
+  customWeightsActive=true;
+  updatePdHeaderLabels();
+  renderTable();
+}
+function resetWeightSliders(){
+  byId("wEra").value=35;byId("wKbb").value=35;byId("wBaa").value=10;
+  byId("wHr9").value=10;byId("wIp").value=5;byId("wWpa").value=5;
+  updateWeightSliderLabels();
+  byId("weightError").textContent="";
+  customWeightsActive=false;
+  customPdMap=null;
+  updatePdHeaderLabels();
+}
+
 function applyFilters(){
  const q=byId("search").value.trim().toLowerCase(),from=+byId("from").value,to=+byId("to").value;
  const minVal=byId("minpd").value.trim(); const min=minVal===""?-Infinity:+minVal;
  const max=byId("maxpd").value===""?Infinity:+byId("maxpd").value;
- filtered=DATA.filter(d=>d.season>=from&&d.season<=to&&(d.pd??-Infinity)>=min&&(d.pd??Infinity)<=max&&(!q||d.player.toLowerCase().includes(q)));
+ filtered=DATA.filter(d=>{
+   const pdForFilter=(customWeightsActive&&customPdMap&&customPdMap.has(d.id))?customPdMap.get(d.id).pd:d.pd;
+   return d.season>=from&&d.season<=to&&(pdForFilter??-Infinity)>=min&&(pdForFilter??Infinity)<=max&&(!q||d.player.toLowerCase().includes(q));
+ });
  renderTable();renderScatter();
 }
 function profile(i){
@@ -42,7 +121,18 @@ function profile(i){
  <div class="bar" title="Top ${c.percentile.toFixed(1)}% of qualified pitcher-seasons"><i style="width:${Math.max(0,Math.min(100,c.percentile))}%"></i></div>`).join("")}
  <p class="note mt-14">Component bars show the pitcher's percentile position in the full qualified pitcher-season distribution, with the best z-score at 100%.</p>`;
 }
-function row(d){return `<tr data-id="${d.id}"><td>${d.rank}</td><td>${d.season}</td><td>${d.player}</td><td>${d.team}</td><td><b>${fmt(d.pd,2)}</b></td><td>${fmt(d.war,1)}</td><td>${fmt(d.era,2)}</td><td>${fmt(d.kbb,1)}%</td><td>${fmtBAA(d.baa)}</td><td>${fmt(d.hr9,2)}</td><td>${fmt(d.ip,1)}</td><td>${fmt(d.wpa,2)}</td></tr>`}
+function row(d){
+  let rankCell,pdCell;
+  const c=(customWeightsActive&&customPdMap)?customPdMap.get(d.id):null;
+  if(c){
+    rankCell=`${c.rank.toLocaleString()}<span class="pd-cell-official">${d.rank.toLocaleString()} official</span>`;
+    pdCell=`<b>${fmt(c.pd,2)}</b><span class="pd-cell-official">${fmt(d.pd,2)} official</span>`;
+  }else{
+    rankCell=`${d.rank}`;
+    pdCell=`<b>${fmt(d.pd,2)}</b>`;
+  }
+  return `<tr data-id="${d.id}"><td>${rankCell}</td><td>${d.season}</td><td>${d.player}</td><td>${d.team}</td><td>${pdCell}</td><td>${fmt(d.war,1)}</td><td>${fmt(d.era,2)}</td><td>${fmt(d.kbb,1)}%</td><td>${fmtBAA(d.baa)}</td><td>${fmt(d.hr9,2)}</td><td>${fmt(d.ip,1)}</td><td>${fmt(d.wpa,2)}</td></tr>`;
+}
 function bindRows(sel){document.querySelectorAll(sel+" tbody tr").forEach(tr=>tr.onclick=()=>profile(+tr.dataset.id))}
 function ordinal(n){const s=["th","st","nd","rd"],v=n%100;return n+(s[(v-20)%10]||s[v]||s[0])}
 function computeCyYoungLeaders(minCount=4){
@@ -330,7 +420,18 @@ function renderTop(){
  bindRows("#topTable");
 }
 function renderTable(){
- let rows=filtered.slice().sort((a,b)=>{let av=a[sortKey],bv=b[sortKey];if(typeof av==="string")return sortDir*String(av).localeCompare(String(bv));return sortDir*((av??-Infinity)-(bv??-Infinity))});
+ let rows=filtered.slice().sort((a,b)=>{
+   let av,bv;
+   if((sortKey==="pd"||sortKey==="rank")&&customWeightsActive&&customPdMap){
+     const field=sortKey==="pd"?"pd":"rank";
+     av=customPdMap.get(a.id)?.[field]??a[sortKey];
+     bv=customPdMap.get(b.id)?.[field]??b[sortKey];
+   }else{
+     av=a[sortKey];bv=b[sortKey];
+   }
+   if(typeof av==="string")return sortDir*String(av).localeCompare(String(bv));
+   return sortDir*((av??-Infinity)-(bv??-Infinity));
+ });
  byId("count").textContent=`Showing ${rows.length.toLocaleString()} of ${DATA.length.toLocaleString()} pitcher-seasons`;
  byId("leaderTable").querySelector("tbody").innerHTML=rows.map(row).join("");bindRows("#leaderTable");
 }
@@ -1274,7 +1375,10 @@ function initHome(){
   byId("from").value=seasons[0];byId("to").value=seasons.at(-1);
   document.querySelectorAll("#leaderTable th").forEach(th=>th.onclick=()=>{const k=th.dataset.key;if(sortKey===k)sortDir*=-1;else{sortKey=k;sortDir=1}renderTable()});
   ["search","from","to","minpd","maxpd"].forEach(id=>byId(id).addEventListener("input",applyFilters));
-  byId("reset").onclick=()=>{byId("search").value="";byId("from").value=seasons[0];byId("to").value=seasons.at(-1);byId("minpd").value="";byId("maxpd").value="";applyFilters()};
+  byId("reset").onclick=()=>{byId("search").value="";byId("from").value=seasons[0];byId("to").value=seasons.at(-1);byId("minpd").value="";byId("maxpd").value="";resetWeightSliders();applyFilters();renderTable()};
+  ["wEra","wKbb","wBaa","wHr9","wIp","wWpa"].forEach(id=>byId(id).addEventListener("input",updateWeightSliderLabels));
+  byId("lockWeights").addEventListener("click",lockInWeights);
+  updateWeightSliderLabels();
   window.onresize=renderScatter;
   renderTop();
   applyFilters();

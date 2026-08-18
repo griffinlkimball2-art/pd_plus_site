@@ -32,10 +32,27 @@
 <div class="control"><label>Maximum PD+</label><input id="maxpd" type="text" inputmode="decimal" value="" placeholder=""></div>
 <button id="reset">Reset</button>
 </div>
+<div class="weight-panel">
+  <div class="weight-panel-title">Custom PD+ Weights</div>
+  <p class="note">Adjust the relative weight of each component, then lock them in to recompute the leaderboard. Weights must sum to 100.</p>
+  <div class="weight-sliders">
+    <div class="weight-slider"><label for="wEra">ERA <span id="wEraVal">35</span></label><input type="range" id="wEra" min="0" max="100" value="35"></div>
+    <div class="weight-slider"><label for="wKbb">K-BB% <span id="wKbbVal">35</span></label><input type="range" id="wKbb" min="0" max="100" value="35"></div>
+    <div class="weight-slider"><label for="wBaa">BAA <span id="wBaaVal">10</span></label><input type="range" id="wBaa" min="0" max="100" value="10"></div>
+    <div class="weight-slider"><label for="wHr9">HR/9 <span id="wHr9Val">10</span></label><input type="range" id="wHr9" min="0" max="100" value="10"></div>
+    <div class="weight-slider"><label for="wIp">IP <span id="wIpVal">5</span></label><input type="range" id="wIp" min="0" max="100" value="5"></div>
+    <div class="weight-slider"><label for="wWpa">WPA <span id="wWpaVal">5</span></label><input type="range" id="wWpa" min="0" max="100" value="5"></div>
+  </div>
+  <div class="weight-panel-footer">
+    <div class="weight-total">Total: <b id="weightTotal">100</b></div>
+    <button id="lockWeights" type="button">Lock In Weights</button>
+    <span class="weight-error" id="weightError"></span>
+  </div>
+</div>
 <p class="note" id="count"></p>
 <div class="table-wrap"><table id="leaderTable"><thead><tr>
-<th data-key="rank">Rank</th><th data-key="season">Season</th><th data-key="player">Pitcher</th><th data-key="team">Team</th>
-<th data-key="pd">PD+</th><th data-key="war">fWAR</th><th data-key="era">ERA</th><th data-key="kbb">K-BB%</th><th data-key="baa">BAA</th><th data-key="hr9">HR/9</th><th data-key="ip">IP</th><th data-key="wpa">WPA</th>
+<th data-key="rank" id="rankHeader">Rank</th><th data-key="season">Season</th><th data-key="player">Pitcher</th><th data-key="team">Team</th>
+<th data-key="pd" id="pdHeader">PD+</th><th data-key="war">fWAR</th><th data-key="era">ERA</th><th data-key="kbb">K-BB%</th><th data-key="baa">BAA</th><th data-key="hr9">HR/9</th><th data-key="ip">IP</th><th data-key="wpa">WPA</th>
 </tr></thead><tbody></tbody></table></div></div>
 <div class="section grid two">
 <div class="card"><h2>PD+ by Season</h2><div id="scatter" class="scatter-box"></div><p class="note">Each point is a qualified pitcher-season. Filters update the plot.</p></div>
