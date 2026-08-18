@@ -1091,7 +1091,7 @@ function hhUpdate(){
 
 /* Historical Cy Young Prediction (year/league picker) */
 const CY_YEARS=Array.from({length:52},(_,i)=>2025-i);
-const CY_YEAR_OVERRIDES={"1984|NL":{player:"Rick Sutcliffe",team:"CLE/CHC",pd:105.8637159,league:"NL",isReliever:false}};
+const CY_YEAR_OVERRIDES={"1984|NL":{player:"Rick Sutcliffe",team:"CLE/CHC",pd:105.8587242,league:"NL",isReliever:false}};
 let cyDecadeSelect=null,cyYearSelect=null,cyLeagueSelect=null,cyResult=null,cyVerdict=null,cyReset=null;
 
 function cyBlankResult(){
