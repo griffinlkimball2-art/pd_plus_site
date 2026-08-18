@@ -368,3 +368,11 @@ header h1{font-size:28px}
 .similar-season-year{font-size:12px;color:#999;font-weight:400;margin-left:6px}
 .similar-season-pd{font-size:11px;color:#666;margin-top:2px}
 .similar-season-pct{font-size:17px;font-weight:800;text-align:right}
+
+/* Custom weights rank difference badge */
+.rank-diff{font-size:11px;font-weight:700}
+.rank-diff-up{color:#0f6e56}
+.rank-diff-down{color:#a32d2d}
+
+/* Head-to-Head reset row */
+.hh-reset-row{display:flex;justify-content:flex-end;margin-bottom:10px}

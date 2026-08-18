@@ -125,7 +125,11 @@ function row(d){
   let rankCell,pdCell;
   const c=(customWeightsActive&&customPdMap)?customPdMap.get(d.id):null;
   if(c){
-    rankCell=`${c.rank.toLocaleString()}<span class="pd-cell-official">${d.rank.toLocaleString()} official</span>`;
+    const diff=d.rank-c.rank;
+    let diffBadge="";
+    if(diff>0)diffBadge=`<span class="rank-diff rank-diff-up">+${diff.toLocaleString()}</span>`;
+    else if(diff<0)diffBadge=`<span class="rank-diff rank-diff-down">\u2212${Math.abs(diff).toLocaleString()}</span>`;
+    rankCell=`${c.rank.toLocaleString()} ${diffBadge}<span class="pd-cell-official">${d.rank.toLocaleString()} official</span>`;
     pdCell=`<b>${fmt(c.pd,2)}</b><span class="pd-cell-official">${fmt(d.pd,2)} official</span>`;
   }else{
     rankCell=`${d.rank}`;
@@ -533,6 +537,7 @@ function clearPeakPlayer(){
  byId("pdPeakSearch").value="";
  byId("pdPeakSuggestions").style.display="none";
  byId("pdPeakSelected").style.display="none";
+ byId("pdPeakLength").value="";
  renderPeakFinder();
 }
 
@@ -982,6 +987,7 @@ function hhControlsHTML(side){
 }
 function hhBodyHTML(){
   return `
+  <div class="hh-reset-row"><button type="button" id="hhReset">Reset</button></div>
   <div class="hh-compare-grid">
     <div class="hh-panel">
       <div class="hh-panel-label">Pitcher 1</div>
@@ -1032,6 +1038,7 @@ function hhSetMode(mode){
   }
   body.innerHTML=hhBodyHTML();
   hhById("hhHowWorksText").textContent=hhHowWorksText();
+  hhById("hhReset").addEventListener("click",()=>hhSetMode(hhMode));
   [1,2].forEach(side=>{
     hhById("hhControls"+side).innerHTML=hhControlsHTML(side);
     hhRender(side,null);
@@ -1290,6 +1297,8 @@ function initEraComparison(){
   const el=document.getElementById("pdEraSelect");
   if(!el) return;
   el.addEventListener("change",renderPDEra);
+  const resetBtn=document.getElementById("pdEraReset");
+  if(resetBtn)resetBtn.addEventListener("click",()=>{el.value="";renderPDEra();});
   renderPDEra();
 }
 
@@ -1571,6 +1580,14 @@ function initSeasonSearch(){
   document.addEventListener("click",e=>{
     if(!byId("seasonSearchSuggestions")) return;
     if(!e.target.closest(".peak-search-control")) byId("seasonSearchSuggestions").style.display="none";
+  });
+  byId("seasonSearchReset").addEventListener("click",()=>{
+    selectedSeasonSearchPlayer="";
+    byId("seasonSearchInput").value="";
+    byId("seasonSearchSuggestions").style.display="none";
+    byId("seasonSearchYear").disabled=true;
+    byId("seasonSearchYear").innerHTML='<option value="">Choose a pitcher above</option>';
+    renderSeasonSearchResult(null);
   });
   renderSeasonSearchResult(null);
 }
