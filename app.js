@@ -188,6 +188,7 @@ function computeGoatsData(){
     const cyInfo=cyByPlayer.get(player);
     const hypoCY=cyInfo?cyInfo.count:0;
     const hypoYears=cyInfo?cyInfo.wins.map(w=>w.season):[];
+    const legendaryYears=rows.filter(d=>d.pd>=125).sort((a,b)=>a.season-b.season).map(d=>d.season);
     const span=CAREER_SPANS[player];
     return{
       player,
@@ -198,7 +199,8 @@ function computeGoatsData(){
       bestPd:best.pd,
       realCY,hypoCY,
       net:hypoCY-realCY,
-      hypoYears
+      hypoYears,
+      legendaryYears
     };
   });
   results.sort((a,b)=>b.avg-a.avg);
@@ -231,6 +233,10 @@ function renderGoats(){
     <div class="goat-years-block">
       <div class="goat-years-label">PD+ Cy Young Years</div>
       <div class="goat-year-chips">${p.hypoYears.map(y=>`<span class="goat-year-chip">${y}</span>`).join("")}</div>
+    </div>
+    <div class="goat-years-block">
+      <div class="goat-years-label">Legendary Seasons (PD+ \u2265 125)</div>
+      <div class="goat-year-chips">${p.legendaryYears.map(y=>`<span class="goat-year-chip">${y}</span>`).join("")}</div>
     </div>
   </div>`;
   }).join("");
