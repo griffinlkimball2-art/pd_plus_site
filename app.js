@@ -1451,6 +1451,37 @@ function populateSeasonSearchYears(){
   sel.innerHTML='<option value="">Choose a season</option>'+rows.map(d=>`<option value="${d.season}">${d.season}</option>`).join("");
   renderSeasonSearchResult(null);
 }
+/* Similar Seasons -- equal-weighted Euclidean distance across the six
+   z-scores, normalized per search target (the single least-similar season
+   to this specific target always sits at 0%; identical z-scores = 100%).
+   Deliberately unweighted, unlike PD+ itself: this answers "did these two
+   seasons look alike across all six dimensions," not "did they score
+   similarly under PD+'s specific weighting." */
+const SIMILARITY_KEYS=["eraz","kbbz","baaz","hr9z","ipz","wpaz"];
+function computeSimilarSeasons(target,n=5){
+  const others=DATA.filter(d=>d.id!==target.id);
+  const distances=others.map(d=>{
+    const sq=SIMILARITY_KEYS.reduce((sum,k)=>sum+((d[k]??0)-(target[k]??0))**2,0);
+    return{d,dist:Math.sqrt(sq)};
+  });
+  const maxDist=Math.max(...distances.map(x=>x.dist));
+  distances.forEach(x=>{x.pct=maxDist>0?100*(1-x.dist/maxDist):100;});
+  distances.sort((a,b)=>a.dist-b.dist);
+  return distances.slice(0,n);
+}
+function renderSimilarSeasons(target){
+  const panel=byId("similarSeasonsPanel");
+  if(!panel)return;
+  const matches=computeSimilarSeasons(target,5);
+  panel.innerHTML=matches.map(({d,pct})=>`<div class="similar-season-row">
+    <div>
+      <div class="similar-season-name">${d.player}<span class="similar-season-year">${d.season} ${d.lg} \u00b7 ${d.team}</span></div>
+      <div class="similar-season-pd">PD+ ${fmt(d.pd,2)}</div>
+    </div>
+    <div class="similar-season-pct">${pct.toFixed(1)}%</div>
+  </div>`).join("");
+}
+
 function renderSeasonSearchResult(d){
   const el=byId("seasonSearchResult");
   if(!d){
@@ -1493,7 +1524,26 @@ function renderSeasonSearchResult(d){
     <div class="comp-title">Component Breakdown</div>
     ${rankInfo.map(c=>`<div class="note">${c.label}: <b>${fmt(d[c.key],2)}</b> \u00b7 <b>#${c.rank.toLocaleString()}</b> of ${DATA.length.toLocaleString()}</div>
     <div class="bar" title="Top ${c.percentile.toFixed(1)}% of qualified pitcher-seasons"><i style="width:${Math.max(0,Math.min(100,c.percentile))}%"></i></div>`).join("")}
-    <p class="note mt-14">Component bars show the pitcher's percentile position in the full qualified pitcher-season distribution, with the best z-score at 100%.</p>`;
+    <p class="note mt-14">Component bars show the pitcher's percentile position in the full qualified pitcher-season distribution, with the best z-score at 100%.</p>
+    <div class="similar-seasons-block">
+      <button type="button" id="similarSeasonsBtn">See Most Similar Seasons</button>
+      <div id="similarSeasonsPanel" class="similar-seasons-panel" style="display:none"></div>
+    </div>`;
+  const btn=byId("similarSeasonsBtn");
+  if(btn){
+    btn.addEventListener("click",()=>{
+      const panel=byId("similarSeasonsPanel");
+      const showing=panel.style.display!=="none";
+      if(showing){
+        panel.style.display="none";
+        btn.textContent="See Most Similar Seasons";
+      }else{
+        renderSimilarSeasons(d);
+        panel.style.display="block";
+        btn.textContent="Hide Most Similar Seasons";
+      }
+    });
+  }
 }
 function initSeasonSearch(){
   if(!byId("seasonSearchInput")) return;
