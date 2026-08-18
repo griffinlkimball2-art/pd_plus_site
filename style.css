@@ -334,6 +334,7 @@ header h1{font-size:28px}
 .goat-years-label{font-size:10px;color:#999;text-transform:uppercase;letter-spacing:.05em;font-weight:700;margin-bottom:8px}
 .goat-year-chips{display:flex;flex-wrap:wrap;gap:6px}
 .goat-year-chip{background:#f3f3f3;border-radius:6px;padding:5px 9px;font-size:12px;font-weight:700}
+.goat-cy-years .goat-year-chips{min-height:58px;align-content:flex-start}
 
 /* Season Search page */
 .stat-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px 10px}

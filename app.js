@@ -230,7 +230,7 @@ function renderGoats(){
       <div class="goat-cy-item"><div class="goat-cy-num">${p.realCY}</div><div class="goat-cy-label">Real CYs</div></div>
       <div class="goat-cy-item"><div class="goat-cy-net">${netLabel}</div><div class="goat-cy-label">Net</div></div>
     </div>
-    <div class="goat-years-block">
+    <div class="goat-years-block goat-cy-years">
       <div class="goat-years-label">PD+ Cy Young Years</div>
       <div class="goat-year-chips">${p.hypoYears.map(y=>`<span class="goat-year-chip">${y}</span>`).join("")}</div>
     </div>
