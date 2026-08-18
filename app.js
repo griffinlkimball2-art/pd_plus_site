@@ -24,7 +24,7 @@ function profile(i){
    ["BAA Component","baaz"],
    ["HR/9 Component","hr9z"],
    ["IP Component","ipz"],
-   ["WPA Component · Clutch","wpaz"]
+   ["WPA Component","wpaz"]
  ];
  const rankInfo=components.map(([label,key])=>{
    const sorted=DATA.slice().sort((a,b)=>(b[key]??-Infinity)-(a[key]??-Infinity));
@@ -1302,6 +1302,119 @@ function initPeakFinder(){
   renderPeakFinder();
 }
 
+/* Season Search -- full stat line lookup for any single qualified pitcher-season.
+   Reuses the same search/suggestion pattern as Peak Finder and the same
+   component-breakdown bar style as the Home page Season Profile. */
+let selectedSeasonSearchPlayer="";
+function renderSeasonSearchSuggestions(){
+  const input=byId("seasonSearchInput"),box=byId("seasonSearchSuggestions");
+  const q=hhNorm(input.value);
+  if(!q){box.innerHTML="";box.style.display="none";return;}
+  const parts=q.split(/\s+/).filter(Boolean);
+  const matches=hhPlayers.filter(p=>{
+    const n=hhNorm(p);
+    return parts.every(part=>n.includes(part));
+  }).sort((a,b)=>{
+    const an=hhNorm(a),bn=hhNorm(b);
+    const ap=an.startsWith(q)?0:1,bp=bn.startsWith(q)?0:1;
+    if(ap!==bp)return ap-bp;
+    return an.localeCompare(bn);
+  }).slice(0,10);
+  if(!matches.length){box.innerHTML="";box.style.display="none";return;}
+  box.innerHTML=matches.map(p=>`<div class="peak-suggestion" data-player="${hhEsc(p)}">${hhEsc(p)}</div>`).join("");
+  box.style.display="block";
+  box.querySelectorAll(".peak-suggestion").forEach(el=>el.addEventListener("mousedown",e=>{
+    e.preventDefault();
+    selectSeasonSearchPlayer(el.dataset.player);
+  }));
+}
+function selectSeasonSearchPlayer(player){
+  selectedSeasonSearchPlayer=player;
+  byId("seasonSearchInput").value=player;
+  byId("seasonSearchSuggestions").style.display="none";
+  populateSeasonSearchYears();
+}
+function populateSeasonSearchYears(){
+  const sel=byId("seasonSearchYear");
+  const rows=DATA.filter(d=>d.player===selectedSeasonSearchPlayer).sort((a,b)=>a.season-b.season);
+  if(!rows.length){
+    sel.disabled=true;
+    sel.innerHTML='<option value="">Choose a pitcher above</option>';
+    renderSeasonSearchResult(null);
+    return;
+  }
+  sel.disabled=false;
+  sel.innerHTML='<option value="">Choose a season</option>'+rows.map(d=>`<option value="${d.season}">${d.season}</option>`).join("");
+  renderSeasonSearchResult(null);
+}
+function renderSeasonSearchResult(d){
+  const el=byId("seasonSearchResult");
+  if(!d){
+    el.innerHTML='<div class="pd-era-empty">Search for a pitcher, then choose a season to see the full stat line.</div>';
+    return;
+  }
+  const components=[
+    ["ERA Z-Score","eraz"],["K-BB% Z-Score","kbbz"],["BAA Z-Score","baaz"],
+    ["HR/9 Z-Score","hr9z"],["IP Z-Score","ipz"],["WPA Z-Score","wpaz"]
+  ];
+  const rankInfo=components.map(([label,key])=>{
+    const sorted=DATA.slice().sort((a,b)=>(b[key]??-Infinity)-(a[key]??-Infinity));
+    const rank=sorted.findIndex(x=>x.id===d.id)+1;
+    const percentile=DATA.length>1?100*(1-(rank-1)/(DATA.length-1)):100;
+    return{label,key,rank,percentile};
+  });
+  el.innerHTML=`<div class="label">${d.season} season</div><h3>${d.player}</h3><div class="big">${fmt(d.pd,2)}</div><div class="label">Pitching Dominance+</div>
+    <hr class="divider">
+    <div class="stat-grid">
+      <div><b>Team</b>${d.team}</div>
+      <div><b>LG</b>${d.lg}</div>
+      <div><b>Age</b>${fmt(d.age,0)}</div>
+      <div><b>fWAR</b>${fmt(d.war,1)}</div>
+      <div><b>BABIP</b>${fmtBAA(d.babip)}</div>
+      <div><b>W-L</b>${d.w}-${d.l}</div>
+      <div><b>ERA</b>${fmt(d.era,2)}</div>
+      <div><b>K-BB%</b>${fmt(d.kbb,1)}%</div>
+      <div><b>BAA</b>${fmtBAA(d.baa)}</div>
+      <div><b>HR/9</b>${fmt(d.hr9,2)}</div>
+      <div><b>IP</b>${fmt(d.ip,1)}</div>
+      <div><b>WPA</b>${fmt(d.wpa,2)}</div>
+    </div>
+    <hr class="divider">
+    <div class="comp-title">Component Breakdown</div>
+    ${rankInfo.map(c=>`<div class="note">${c.label}: <b>${fmt(d[c.key],2)}</b> \u00b7 <b>#${c.rank.toLocaleString()}</b> of ${DATA.length.toLocaleString()}</div>
+    <div class="bar" title="Top ${c.percentile.toFixed(1)}% of qualified pitcher-seasons"><i style="width:${Math.max(0,Math.min(100,c.percentile))}%"></i></div>`).join("")}
+    <p class="note mt-14">Component bars show the pitcher's percentile position in the full qualified pitcher-season distribution, with the best z-score at 100%.</p>`;
+}
+function initSeasonSearch(){
+  if(!byId("seasonSearchInput")) return;
+  byId("seasonSearchInput").addEventListener("input",()=>{
+    renderSeasonSearchSuggestions();
+    const val=byId("seasonSearchInput").value;
+    const canon=hhCanonical(val);
+    if(canon){
+      selectedSeasonSearchPlayer=canon;
+      populateSeasonSearchYears();
+    }else if(!val.trim()){
+      selectedSeasonSearchPlayer="";
+      byId("seasonSearchYear").disabled=true;
+      byId("seasonSearchYear").innerHTML='<option value="">Choose a pitcher above</option>';
+      renderSeasonSearchResult(null);
+    }
+  });
+  byId("seasonSearchInput").addEventListener("focus",renderSeasonSearchSuggestions);
+  byId("seasonSearchYear").addEventListener("change",()=>{
+    const season=Number(byId("seasonSearchYear").value);
+    if(!season){renderSeasonSearchResult(null);return;}
+    const d=DATA.find(x=>x.player===selectedSeasonSearchPlayer&&x.season===season);
+    renderSeasonSearchResult(d);
+  });
+  document.addEventListener("click",e=>{
+    if(!byId("seasonSearchSuggestions")) return;
+    if(!e.target.closest(".peak-search-control")) byId("seasonSearchSuggestions").style.display="none";
+  });
+  renderSeasonSearchResult(null);
+}
+
 function initHeadToHead(){
   const modeSel=hhById("hhMode");
   if(!modeSel) return;
@@ -1375,6 +1488,7 @@ function initSeasonCharts(){
 /* Run every page init. Each one is a no-op if its markup isn't on the page. */
 initHome();
 initPeakFinder();
+initSeasonSearch();
 initHeadToHead();
 initCyYoungPredictor();
 initCyYoungLeaders();
