@@ -110,6 +110,7 @@ footer{color:var(--muted);font-size:12px;margin-top:24px}
 .data-source{font-size:14px;font-weight:600;line-height:1.35}
 .peak-search-row{display:flex;gap:10px;align-items:end;flex-wrap:wrap;margin:4px 0 10px}
 .peak-search-control{position:relative;flex:1 1 320px;min-width:240px}
+.peak-search-row .peak-search-control{flex:1 1 200px;min-width:160px}
 .peak-search-control input{width:100%}
 .peak-suggestions{position:absolute;left:0;right:0;top:100%;z-index:40;background:#fff;border:1px solid #ccc;border-top:0;border-radius:0 0 8px 8px;box-shadow:0 4px 12px rgba(0,0,0,.08);max-height:210px;overflow:auto;display:none}
 .peak-suggestion{padding:9px 10px;font-size:13px;cursor:pointer;border-bottom:1px solid #f0f0f0}
@@ -312,7 +313,7 @@ header h1{font-size:28px}
 /* GOATs of PD+ page */
 .pagehead{margin-bottom:18px}
 .pagehead h2{font-size:22px;margin:0 0 6px;font-weight:800}
-.pagehead .section-subtitle{font-size:13px;color:#666;margin:0;line-height:1.5;max-width:640px}
+.pagehead .section-subtitle{font-size:13px;color:#666;margin:0;line-height:1.5}
 .goat-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
 .goat-card{background:var(--card,#fff);border:1px solid var(--line,#ddd);border-radius:12px;padding:20px}
 .goat-rank{font-size:12px;font-weight:700;color:#999;text-transform:uppercase;letter-spacing:.06em}

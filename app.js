@@ -1458,7 +1458,7 @@ function populateSeasonSearchYears(){
   const rows=DATA.filter(d=>d.player===selectedSeasonSearchPlayer).sort((a,b)=>a.season-b.season);
   if(!rows.length){
     sel.disabled=true;
-    sel.innerHTML='<option value="">Choose a pitcher above</option>';
+    sel.innerHTML='<option value="">Choose a pitcher</option>';
     renderSeasonSearchResult(null);
     return;
   }
@@ -1572,7 +1572,7 @@ function initSeasonSearch(){
     }else if(!val.trim()){
       selectedSeasonSearchPlayer="";
       byId("seasonSearchYear").disabled=true;
-      byId("seasonSearchYear").innerHTML='<option value="">Choose a pitcher above</option>';
+      byId("seasonSearchYear").innerHTML='<option value="">Choose a pitcher</option>';
       renderSeasonSearchResult(null);
     }
   });
@@ -1592,7 +1592,7 @@ function initSeasonSearch(){
     byId("seasonSearchInput").value="";
     byId("seasonSearchSuggestions").style.display="none";
     byId("seasonSearchYear").disabled=true;
-    byId("seasonSearchYear").innerHTML='<option value="">Choose a pitcher above</option>';
+    byId("seasonSearchYear").innerHTML='<option value="">Choose a pitcher</option>';
     renderSeasonSearchResult(null);
   });
   renderSeasonSearchResult(null);
