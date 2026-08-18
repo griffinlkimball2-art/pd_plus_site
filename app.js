@@ -1088,7 +1088,7 @@ function cyBlankResult(){
 
 function populateCYYears(){
   const decade=Number(cyDecadeSelect.value);
-  cyYearSelect.innerHTML='<option value="">Choose year</option>';
+  cyYearSelect.innerHTML='<option value="">Choose a year</option>';
   if(!decade){
     cyYearSelect.disabled=true;
     cyBlankResult();
@@ -1169,7 +1169,7 @@ function initCyYoungPredictor(){
   cyLeagueSelect.addEventListener("change",renderCYPrediction);
   cyReset.addEventListener("click",()=>{
     cyDecadeSelect.value="";
-    cyYearSelect.innerHTML='<option value="">Choose year</option>';
+    cyYearSelect.innerHTML='<option value="">Choose a year</option>';
     cyYearSelect.disabled=true;
     cyLeagueSelect.value="";
     cyBlankResult();
