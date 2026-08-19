@@ -422,9 +422,12 @@ function renderTop(){
    let signifier="—";
    if(won) signifier='<span class="pill" title="Cy Young Award winner">CY</span>';
    if(ongoing) signifier=`<span class="pill" title="${CURRENT_SEASON} season is ongoing">LIVE</span>`;
+   let tcSignifier="—";
+   if(d.tc===1) tcSignifier='<span class="pill" title="Triple Crown winner">TC</span>';
+   if(d.player==="Jacob Misiorowski"&&ongoing) tcSignifier=`<span class="pill" title="On pace for a Triple Crown -- ${CURRENT_SEASON} season is ongoing">LIVE</span>`;
    return `<tr data-id="${d.id}">
      <td>${d.rank}</td><td>${d.season}</td>
-     <td>${d.player}</td><td>${d.team}</td><td>${fmt(d.age,0)}</td><td><b>${fmt(d.pd,2)}</b></td><td>${signifier}</td>
+     <td>${d.player}</td><td>${d.team}</td><td>${fmt(d.age,0)}</td><td><b>${fmt(d.pd,2)}</b></td><td>${signifier}</td><td>${tcSignifier}</td>
    </tr>`;
  }).join("");
  bindRows("#topTable");
@@ -1518,6 +1521,8 @@ function renderSeasonSearchResult(d){
       <div class="big">${fmt(d.pd,2)}</div>
       <span class="season-search-rank">#${d.rank.toLocaleString()} all-time</span>
       ${d.cy===1?'<span class="pill" title="Cy Young Award winner">CY</span>':""}
+      ${d.tc===1?'<span class="pill" title="Triple Crown winner">TC</span>':""}
+      ${d.season===CURRENT_SEASON?`<span class="pill" title="${CURRENT_SEASON} season is ongoing">LIVE</span>`:""}
     </div>
     <div class="label">Pitching Dominance+</div>
     <hr class="divider">
